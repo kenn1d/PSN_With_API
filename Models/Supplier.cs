@@ -13,6 +13,9 @@ namespace PetrolStationNetwork.Models
         [ObservableProperty]
         private string company_name;
 
+        [NotMapped]
+        public string FullName => User.Full_name;
+
         public User User { get; set; }
     }
 }
