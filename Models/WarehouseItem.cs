@@ -8,7 +8,7 @@ namespace PetrolStationNetwork.Models
         public int id { get; set; }
 
         [ObservableProperty]
-        public int delivery_items_id;
+        public int? delivery_items_id;
 
         [ObservableProperty]
         public int product_id;

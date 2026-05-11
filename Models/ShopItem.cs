@@ -8,7 +8,7 @@ namespace PetrolStationNetwork.Models
         public int id { get; set; }
 
         [ObservableProperty]
-        private int warehouse_item_id;
+        private int? warehouse_item_id;
 
         [ObservableProperty]
         private int? count;

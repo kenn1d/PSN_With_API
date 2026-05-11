@@ -26,7 +26,7 @@ namespace PetrolStationNetwork.ViewModels
 
         // Позиция продукта на складе
         [ObservableProperty]
-        private int selectedWarehouseItem;
+        private int? selectedWarehouseItem;
 
         // Количество продукта
         [ObservableProperty]
