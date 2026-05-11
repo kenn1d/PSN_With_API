@@ -4,11 +4,109 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PetrolStationNetwork.Views.Pages"
+      xmlns:elements="clr-namespace:PetrolStationNetwork.Views.Components"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="Staff">
 
-    <Grid>
+    <Grid Background="White">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
         
+        <Label Grid.Row="0"
+        Content="Персонал"
+        FontSize="28"
+        FontWeight="SemiBold"
+        Foreground="#1565C0"
+        HorizontalAlignment="Left"
+        VerticalAlignment="Top" Width="780" Grid.ColumnSpan="2" Margin="10,0,0,0"/>
+
+        <Button
+         Command="{Binding Exit}"
+         Content="Назад"
+         Background="#F44336"
+         Foreground="White"
+         BorderThickness="0"
+         FontSize="14"
+         FontWeight="SemiBold"
+         Padding="0"
+         Width="75"
+         Height="25"
+         Cursor="Hand"
+         HorizontalContentAlignment="Center"
+         VerticalAlignment="Bottom"
+         HorizontalAlignment="Left"
+         Margin="10,0,0,10">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="4"/>
+                </Style>
+            </Button.Resources>
+        </Button>
+
+        <ListView ItemsSource="{Binding Staff}" SelectedItem="{Binding SelectedItem}"
+   HorizontalContentAlignment="Stretch" Margin="10,50,10,45"
+   BorderThickness="0" Padding="0" Background="Transparent">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <elements:Staff DataContext="{Binding}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Grid Grid.Column="1" Margin="0,50,0,10">
+            <Label Foreground="#1565C0" VerticalAlignment="Top" HorizontalAlignment="Left" Content="Пользователь:" Margin="10,0,0,0" />
+            <ComboBox x:Name="user" BorderBrush="#64B5F6" SelectedValue="{Binding User, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Users}"
+                VerticalAlignment="Top" Margin="10,26,10,0" Height="26" DisplayMemberPath="Full_name" SelectedValuePath="id"/>
+
+            <Label Foreground="#1565C0" VerticalAlignment="Top" HorizontalAlignment="Left" Content="Роль:" Margin="10,60,0,0" />
+            <ComboBox x:Name="role" BorderBrush="#64B5F6" VerticalAlignment="Top" Margin="10,86,10,0" Height="26" 
+                SelectedValue="{Binding Role, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Content">
+                <ComboBoxItem Content="leader" />
+                <ComboBoxItem Content="worker" />
+            </ComboBox>
+
+            <Button x:Name="bthAdd"
+         Command="{Binding Add}"
+         Height="25" 
+         VerticalAlignment="Bottom" 
+         Width="80" 
+         Margin="0,0,10,0" 
+         FontSize="14"
+         HorizontalAlignment="Right" 
+         Content="{Binding BthAddContent}" 
+         BorderThickness="0"
+         Background="#2196F3"
+         FontWeight="SemiBold"
+         Foreground="White" IsEnabled="False">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <Button x:Name="bthDelete"
+         Command="{Binding OnDelete}"
+         Height="25" 
+         VerticalAlignment="Bottom" 
+         Width="80" 
+         Margin="10,0,110,0" 
+         FontSize="14"
+         HorizontalAlignment="Left" 
+         Content="Удалить" 
+         BorderThickness="0"
+         Background="#F44336"
+         FontWeight="SemiBold"
+         Foreground="White" IsEnabled="False">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </Grid>
     </Grid>
 </Page>
