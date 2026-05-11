@@ -20,6 +20,7 @@ namespace PetrolStationNetwork.Views.Pages
             }
             else if (UserSession.Role == "worker")
             {
+                Deliveries.IsEnabled = true;
                 DeliveryItems.IsEnabled = true;
                 WarehouseItems.IsEnabled = true;
                 ShopItems.IsEnabled = true;

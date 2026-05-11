@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using PetrolStationNetwork.Data;
+using PetrolStationNetwork.Models;
 using PetrolStationNetwork.Views.Pages;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -22,6 +23,12 @@ namespace PetrolStationNetwork.ViewModels
         private ObservableCollection<Supplier> suppliers;
 
         [ObservableProperty]
+        private ObservableCollection<WarehouseItem> warehouseItems;
+
+        [ObservableProperty]
+        private ObservableCollection<DeliveryItem> deliveryItems;
+
+        [ObservableProperty]
         private string serialNumber;
 
         [ObservableProperty]
@@ -37,16 +44,18 @@ namespace PetrolStationNetwork.ViewModels
         public ICommand Add { get; }
         public ICommand OnDelete { get; }
 
-        //TODO: При установке статуса "Принята" - скопировать поставку в таблицу склада
         public VMDelivery()
         {
             dataBase.Deliveries.Load();
             dataBase.Suppliers.Load();
+            dataBase.WarehouseItems.Load();
+            dataBase.DeliveryItems.Load();
             BthAddContent = "Добавить";
 
             this.deliveries = new ObservableCollection<Delivery>(dataBase.Deliveries.ToList());
             this.suppliers = new ObservableCollection<Supplier>(dataBase.Suppliers.ToList());
-
+            this.warehouseItems = new ObservableCollection<WarehouseItem>(dataBase.WarehouseItems.ToList());
+            
             if (UserSession.Role == "leader") Delete = true;
             Add = new RelayCommand(() => {
                 // Проверяем, что запись добавлется
@@ -76,15 +85,25 @@ namespace PetrolStationNetwork.ViewModels
                 // Проверяем, что запись изменяется, и что запись принадлежит текущему юзеру, если юзер это поставщик
                 else if (selectedItem != null)
                 {
-                    if (UserSession.Role == "Supplier") 
+                    if (selectedItem.Status != "Принята")
                     {
-                        if (selectedItem.Supplier_id == UserSession.Id)
+                        if (UserSession.Role == "Supplier")
+                        {
+                            if (selectedItem.Supplier_id == UserSession.Id)
+                                UpdateRecord();
+                            else { MessageBox.Show("Запись вам не принадлежит", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+                        }
+                        else
+                        {
                             UpdateRecord();
-                        else { MessageBox.Show("Запись вам не принадлежит", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+                        }
                     }
-                    else 
-                    {
-                        UpdateRecord();
+                    else { 
+                        MessageBox.Show("Редактирование невозможно. Поставка была принята", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        SerialNumber = "";
+                        SelectedItem = null;
+                        BthAddContent = "Добавить";
+                        return;
                     }
                 }
                 else { MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
@@ -132,6 +151,23 @@ namespace PetrolStationNetwork.ViewModels
             // Проверяем что все поля заполнены
             if (serialNumber != null)
             {
+                // Если статус "Принята", то копируем поставку в таблицу склада, иначе просто обновляем статус и серийный номер
+                if (selectedStatus == "Принята")
+                {
+                    this.DeliveryItems = new ObservableCollection<DeliveryItem>(dataBase.DeliveryItems.Where(x => x.Delivery_id == selectedItem.id).ToList());
+                    foreach (var i in this.DeliveryItems)
+                    {
+                        WarehouseItem newWarehouseItem = new WarehouseItem()
+                        {
+                            Delivery_items_id = i.id,
+                            Product_id = i.Product_id,
+                            Count = i.Count,
+                            Exp_date = i.Exp_date,
+                            Position = "Н/Д"
+                        };
+                        dataBase.WarehouseItems.Add(newWarehouseItem);
+                    }
+                }
                 selectedItem.Serial_number = serialNumber;
                 selectedItem.Status = selectedStatus;
                 SelectedItem = null;
