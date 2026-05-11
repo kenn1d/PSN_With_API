@@ -24,7 +24,12 @@ namespace PetrolStationNetwork.Models
 
         public virtual Product Product { get; set; }
 
+        public virtual DeliveryItem DeliveryItem { get; set; }
+
         [NotMapped]
         public string ProductName => Product.Name;
+
+        [NotMapped]
+        public string DeliverySerialNumber => DeliveryItem.Delivery.Serial_number;
     }
 }

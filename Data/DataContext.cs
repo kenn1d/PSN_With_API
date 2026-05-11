@@ -72,6 +72,11 @@ namespace PetrolStationNetwork.Data
                 .HasOne(wi => wi.Product)
                 .WithMany()
                 .HasForeignKey(wi => wi.Product_id);
+            // Настройка связи DeliveryItem и WarehouseItem для получения Серии и Номера поставки на основе id
+            modelBuilder.Entity<WarehouseItem>()
+                .HasOne(wi => wi.DeliveryItem)
+                .WithMany()
+                .HasForeignKey(wi => wi.Delivery_items_id);
 
             // Настройка связи WarehouseItem и ShopItem для получения позиции поставки на основе id
             modelBuilder.Entity<ShopItem>()
