@@ -104,6 +104,25 @@
                     </Style>
                 </Button.Resources>
             </Button>
+            <Button x:Name="bthSale"
+                Command="{Binding OnSale}"
+                Height="25" 
+                VerticalAlignment="Top" 
+                Width="180" 
+                Margin="0,335,0,0" 
+                FontSize="14"
+                HorizontalAlignment="Center" 
+                Content="Продажа" 
+                BorderThickness="0"
+                Background="#2196F3"
+                FontWeight="SemiBold"
+                Foreground="White" IsEnabled="False">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
         </Grid>
     </Grid>
 </Page>

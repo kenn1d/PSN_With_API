@@ -18,6 +18,7 @@ namespace PetrolStationNetwork.Views.Pages
                 bthAdd.IsEnabled = true;
                 position.IsEnabled = true;
                 count.IsEnabled = true;
+                bthSale.IsEnabled = true;
             }
         }
     }

@@ -39,8 +39,8 @@ namespace PetrolStationNetwork.ViewModels
         public ICommand Exit { get; }
         public ICommand Add { get; }
         public ICommand OnDelete { get; }
-
-        //TODO: Реализовать грамотное вычисление количества товара
+        public ICommand OnSale { get; }
+        
         //TODO: Реализовать обработку ошибок при вводе не числа в TextBox
         public VMShopItems()
         {
@@ -57,28 +57,58 @@ namespace PetrolStationNetwork.ViewModels
                 {
                     if (selectedWarehouseItem != 0 && count != null)
                     {
+                        var WI = warehouseItems.FirstOrDefault(x => x.id == selectedWarehouseItem);
 
                         // Проверяем есть ли уже элемент с такой позицией
                         // Если true то изменяем количество - обновляем запись
                         var existingItem = shopItems.FirstOrDefault(x => x.ItemPosition == warehouseItems.First(x => x.id == selectedWarehouseItem).Position);
                         if (existingItem != null)
                         {
-                            existingItem.Count = count;
+                            // Обновляем остатки
+                            if (WI != null) 
+                            {
+                                // Cчитаем разницу между тем что было и тем что ввели
+                                int diff = count - (int)existingItem.Count ?? 0;
+                                if (WI.Count >= diff)
+                                {
+                                    WI.Count -= diff; // Если diff > 0, забираем со склада, иначе возвращаем на склад
+                                    existingItem.Count = count;
+                                }
+                                else
+                                {
+                                    MessageBox.Show("На складе недостаточно товара", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                    return;
+                                }
+                            }
                         }
                         // Просто добавляем новую запись
                         else
                         {
-                            Models.ShopItem newShopItem = new Models.ShopItem()
+                            // Обновляем остатки
+                            if (WI != null)
                             {
-                                Warehouse_item_id = selectedWarehouseItem,
-                                Count = count
-                            };
-                            dataBase.ShopItems.Add(newShopItem);
-                            ShopItems.Add(newShopItem);
-                            SelectedWarehouseItem = 0;
-                            Count = null;
-                            SelectedItem = null;
+                                if (WI.Count >= (int)count)
+                                {
+                                    WI.Count -= (int)count;
+
+                                    Models.ShopItem newShopItem = new Models.ShopItem()
+                                    {
+                                        Warehouse_item_id = selectedWarehouseItem,
+                                        Count = count
+                                    };
+                                    dataBase.ShopItems.Add(newShopItem);
+                                    ShopItems.Add(newShopItem);
+                                }
+                                else
+                                {
+                                    MessageBox.Show("На складе недостаточно товара", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                    return;
+                                }
+                            }
                         }
+                        SelectedWarehouseItem = 0;
+                        Count = null;
+                        SelectedItem = null;
                     }
                     else
                     {
@@ -92,6 +122,25 @@ namespace PetrolStationNetwork.ViewModels
                     // Проверяем что все поля заполнены
                     if (selectedWarehouseItem != 0 && count != null)
                     {
+                        var WI = warehouseItems.FirstOrDefault(x => x.id == selectedWarehouseItem);
+                        // Обновляем остатки
+                        if (WI != null)
+                        {
+                            // Cчитаем разницу между тем что было и тем что ввели
+                            int diff = (int)count - (selectedItem.Count ?? 0);
+
+                            if (WI.Count >= diff)
+                            {
+                                WI.Count -= diff;
+                                selectedItem.Warehouse_item_id = selectedWarehouseItem;
+                                selectedItem.Count = count;
+                            }
+                            else
+                            {
+                                MessageBox.Show("На складе недостаточно товара", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                return;
+                            }
+                        }
                         selectedItem.Warehouse_item_id = selectedWarehouseItem;
                         selectedItem.Count = count;
                         SelectedWarehouseItem = 0;
@@ -108,6 +157,13 @@ namespace PetrolStationNetwork.ViewModels
             OnDelete = new RelayCommand(() => {
                 if (Delete && SelectedItem != null)
                 {
+                    // Остатки возвращаем на склад
+                    var WI = warehouseItems.FirstOrDefault(x => x.id == SelectedItem.Warehouse_item_id);
+                    if (WI != null)
+                    {
+                        WI.Count += (int)SelectedItem.Count;
+                    }
+
                     dataBase.ShopItems.Remove(SelectedItem);
                     shopItems.Remove(SelectedItem);
                     dataBase.SaveChanges();
@@ -117,6 +173,28 @@ namespace PetrolStationNetwork.ViewModels
                     BthAddContent = "Добавить";
                 }
                 else MessageBox.Show("Выберите запись для удаления", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop);
+            });
+
+            OnSale = new RelayCommand(() =>
+            {
+                if (selectedItem != null)
+                {
+                    if (selectedItem.Count >= count)
+                    {
+                        selectedItem.Count -= count;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Недостаточно товара для продажи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        return;
+                    }
+                }
+                else { MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
+                dataBase.SaveChanges();
+                SelectedWarehouseItem = 0;
+                Count = null;
+                SelectedItem = null;
+                BthAddContent = "Добавить";
             });
 
             Exit = new RelayCommand(() => {
