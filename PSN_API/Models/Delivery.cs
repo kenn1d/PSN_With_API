@@ -7,7 +7,7 @@ namespace PSN_API.Models
         public int id { get; set; }
 
         [ObservableProperty]
-        private int supplier_id;
+        private int? supplier_id;
 
         [ObservableProperty]
         private string serial_number;

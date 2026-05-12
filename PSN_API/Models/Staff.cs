@@ -13,6 +13,9 @@ namespace PSN_API.Models
         [ObservableProperty]
         private string role;
 
+        [NotMapped]
+        public string FullName => User.Full_name;
+
         public User User { get; set; }
     }
 }

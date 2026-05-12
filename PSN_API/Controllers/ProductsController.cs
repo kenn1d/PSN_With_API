@@ -8,12 +8,17 @@ namespace PSN_API.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
+        /// <summary>
+        /// Приватное поле для хранения экземпляра DataContext
+        /// Используется для работы с БД
+        /// </summary>
         private DataContext dataBase;
 
-        public ProductsController(DataContext dataBase) { 
+        /// <summary>
+        /// Конструктор контроллера
+        /// </summary>
+        public ProductsController(DataContext dataBase) {
             this.dataBase = dataBase;
         }
-
-
     }
 }

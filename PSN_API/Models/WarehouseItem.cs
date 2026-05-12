@@ -8,7 +8,7 @@ namespace PSN_API.Models
         public int id { get; set; }
 
         [ObservableProperty]
-        public int delivery_items_id;
+        public int? delivery_items_id;
 
         [ObservableProperty]
         public int product_id;
@@ -24,7 +24,12 @@ namespace PSN_API.Models
 
         public virtual Product Product { get; set; }
 
+        public virtual DeliveryItem DeliveryItem { get; set; }
+
         [NotMapped]
         public string ProductName => Product.Name;
+
+        [NotMapped]
+        public string DeliverySerialNumber => DeliveryItem.Delivery.Serial_number;
     }
 }

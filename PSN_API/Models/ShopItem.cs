@@ -8,10 +8,10 @@ namespace PSN_API.Models
         public int id { get; set; }
 
         [ObservableProperty]
-        public int warehouse_item_id;
+        private int? warehouse_item_id;
 
         [ObservableProperty]
-        public int count;
+        private int? count;
 
         public virtual WarehouseItem WarehouseItem { get; set; }
 

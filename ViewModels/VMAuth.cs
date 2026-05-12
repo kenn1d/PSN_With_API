@@ -1,8 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using PetrolStationNetwork.Data;
 using System.Collections.ObjectModel;
+using System.Net.Http;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Input;
 
@@ -10,6 +13,9 @@ namespace PetrolStationNetwork.ViewModels
 {
     public partial class VMAuth : ObservableObject
     {
+        /// <summary>Базовый URL API для пользовательских операций</summary>
+        public static string url = "https://localhost:7101/api/";
+
         private DataContext dataBase = new DataContext();
 
         [ObservableProperty]
@@ -29,43 +35,68 @@ namespace PetrolStationNetwork.ViewModels
 
         public ICommand LogIn { get; }
 
-        public VMAuth() //TODO: Обработать ошибку от сервера
+        public VMAuth()
         {
-            dataBase.Users.Load();
-            dataBase.Suppliers.Load();
-            dataBase.Staff.Load();
-
-            this.Users = new ObservableCollection<Models.User>(dataBase.Users.ToList());
-            this.Suppliers = new ObservableCollection<Models.Supplier>(dataBase.Suppliers.ToList());
-            this.Staff = new ObservableCollection<Models.Staff>(dataBase.Staff.ToList());
-
-            LogIn = new RelayCommand<object>((param) =>
+            LogIn = new RelayCommand<object>(async (param) =>
             {
                 // Получаем пароль из PasswordBox
                 var passwordBox = param as System.Windows.Controls.PasswordBox;
                 Password = passwordBox.Password;
 
-                // Ищем пользователя в базе данных
-                var findingUser = users.FirstOrDefault(u => u.Login == login && u.Password == password);
-                if (findingUser != null)
+                // Создаём http клиент для отправки запроса
+                using (HttpClient Client = new HttpClient())
                 {
-                    // Если пользователь найден, определяем его роль и загружаем сессию
-                    var findUserRoleSupplier = suppliers.FirstOrDefault(s => s.user_id == findingUser.id);
-                    if (findUserRoleSupplier != null)
+                    // Создаём запрос с методом post
+                    using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Post, url + "Auth/login"))
                     {
-                        UserSession.LoadUser(findingUser.id, findingUser.Full_name, findingUser.Tel_number, "Supplier", findUserRoleSupplier.Company_name);
-                    }
-                    else // Если пользователь не является поставщиком, проверяем, является ли он сотрудником
-                    {
-                        var findUserRoleStaff = staff.FirstOrDefault(s => s.user_id == findingUser.id);
-                        if (findUserRoleStaff != null)
+                        // Формируем данные для отправки
+                        Dictionary<string, string> FormData = new Dictionary<string, string>
                         {
-                            UserSession.LoadUser(findingUser.id, findingUser.Full_name, findingUser.Tel_number, findUserRoleStaff.Role);
+                            ["login"] = login,
+                            ["password"] = Password
+                        };
+                        // Создаём контент запроса из данных формы
+                        FormUrlEncodedContent Content = new FormUrlEncodedContent(FormData);
+                        // Устанавливаем контент в запрос
+                        Request.Content = Content;
+                        // Отправляем запрос и ждём ответ
+                        var Response = await Client.SendAsync(Request);
+                        // Проверяем статус ответа
+                        if (Response.StatusCode == System.Net.HttpStatusCode.OK)
+                        {
+                            // Читаем асинхронно json файл от сервера
+                            string sResponse = await Response.Content.ReadAsStringAsync();
+                            // Десериализуем json в объект
+                            AuthData DataAuth = JsonConvert.DeserializeObject<AuthData>(sResponse);
+                            UserSession.LoadUser(DataAuth.Token, DataAuth.User.id, DataAuth.User.full_name, DataAuth.User.tel_number, DataAuth.User.role, DataAuth.User.company);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Пользователь с таким логином и паролем не найден.", "Пользователь не найден!", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                     }
                 }
-                else MessageBox.Show($"Пользователь с таким логином и паролем не найден.", "Пользователь не найден!", MessageBoxButton.OK, MessageBoxImage.Warning);
             });
+        }
+
+        /// <summary>
+        /// Временный класс для десериализации данных
+        /// </summary>
+        private class AuthData()
+        {
+            public string Token { get; set; }
+            public UserData User { get; set; }
+        }
+        /// <summary>
+        /// Временный класс для десериализации данных
+        /// </summary>
+        private class UserData()
+        {
+            public int id { get; set; }
+            public string full_name { get; set; }
+            public string tel_number { get; set; }
+            public string role { get; set; }
+            public string? company { get; set; }
         }
     }
 }
