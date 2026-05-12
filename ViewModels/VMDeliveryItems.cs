@@ -73,7 +73,7 @@ namespace PetrolStationNetwork.ViewModels
                 // Проверяем, что запись добавлется
                 if (UserSession.Role == "Supplier" && selectedItem == null)
                 {
-                    if (selectedDelivery != 0 && selectedProduct != 0 && productsCount != 0 && expDate > DateTime.Now)
+                    if (selectedDelivery != 0 && selectedProduct != 0 && productsCount > 0 && expDate > DateTime.Now)
                     {
                         // Проверяем есть ли уже элемент такой поставки с таким же продуктом
                         // Если true то суммируем количество - обновляем запись
@@ -106,7 +106,7 @@ namespace PetrolStationNetwork.ViewModels
                 else if (selectedItem != null)
                 {
                     // Проверяем что все поля заполнены
-                    if (selectedDelivery != 0 && selectedProduct != 0 && productsCount != 0 && expDate > DateTime.Now)
+                    if (selectedDelivery != 0 && selectedProduct != 0 && productsCount > 0 && expDate > DateTime.Now)
                     {
                         selectedItem.Delivery_id = selectedDelivery;
                         selectedItem.Product_id = selectedProduct;

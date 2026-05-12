@@ -67,7 +67,7 @@
 
             <Label Foreground="#1565C0" VerticalAlignment="Top" HorizontalAlignment="Left" Content="Количество:" Margin="10,120,0,0" />
             <TextBox IsEnabled="False" x:Name="count" BorderBrush="#64B5F6" VerticalAlignment="Top" 
-                  Margin="10,146,10,0" Height="26" Text="{Binding ProductsCount, UpdateSourceTrigger=PropertyChanged}"/>
+                  Margin="10,146,10,0" Height="26" Text="{Binding ProductsCount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
 
             <Label Foreground="#1565C0" VerticalAlignment="Top" HorizontalAlignment="Left" Content="Срок годности:" Margin="10,178,0,0" />
             <DatePicker IsEnabled="False" x:Name="expDate" BorderBrush="#64B5F6" VerticalAlignment="Top" 

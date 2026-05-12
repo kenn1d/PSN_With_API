@@ -55,7 +55,7 @@ namespace PetrolStationNetwork.ViewModels
                 // Проверяем, что запись добавлется
                 if (selectedItem == null)
                 {
-                    if (selectedWarehouseItem != 0 && count != null)
+                    if (selectedWarehouseItem != 0 && count >= 0)
                     {
                         var WI = warehouseItems.FirstOrDefault(x => x.id == selectedWarehouseItem);
 
@@ -177,7 +177,7 @@ namespace PetrolStationNetwork.ViewModels
 
             OnSale = new RelayCommand(() =>
             {
-                if (selectedItem != null)
+                if (selectedItem != null && count >= 0)
                 {
                     if (selectedItem.Count >= count)
                     {

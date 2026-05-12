@@ -63,7 +63,7 @@
 
             <Label Foreground="#1565C0" VerticalAlignment="Top" HorizontalAlignment="Left" Content="Количество в продаже:" Margin="10,60,0,0" />
             <TextBox IsEnabled="False" x:Name="count" BorderBrush="#64B5F6" VerticalAlignment="Top" Margin="10,86,10,0" Height="26" 
-                  Text="{Binding Count, UpdateSourceTrigger=PropertyChanged}"/>
+                  Text="{Binding Count, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
 
             <Button x:Name="bthAdd"
             Command="{Binding Add}"
