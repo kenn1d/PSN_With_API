@@ -1,11 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using PetrolStationNetwork.Data;
 using System.Collections.ObjectModel;
-using System.Net;
-using System.Net.Http;
 using System.Windows;
 using System.Windows.Input;
 

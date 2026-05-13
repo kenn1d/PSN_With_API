@@ -1,14 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.EntityFrameworkCore;
 using PetrolStationNetwork.Data;
-using PetrolStationNetwork.Models;
 using PetrolStationNetwork.Views.Pages;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using Delivery = PetrolStationNetwork.Models.Delivery;
-using Supplier = PetrolStationNetwork.Models.Supplier;
 
 namespace PetrolStationNetwork.ViewModels
 {
