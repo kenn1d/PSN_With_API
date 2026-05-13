@@ -16,8 +16,6 @@ namespace PetrolStationNetwork.ViewModels
         /// <summary>Базовый URL API для пользовательских операций</summary>
         public static string url = "https://localhost:7101/api/";
 
-        private DataContext dataBase = new DataContext();
-
         [ObservableProperty]
         private ObservableCollection<Models.User> users;
 

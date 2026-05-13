@@ -1,8 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using PetrolStationNetwork.Data;
 using System.Collections.ObjectModel;
+using System.Net;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Input;
 
@@ -10,7 +13,8 @@ namespace PetrolStationNetwork.ViewModels
 {
     public partial class VMProducts : ObservableObject
     {
-        private DataContext dataBase = new DataContext();
+        /// <summary>Базовый URL API для пользовательских операций</summary>
+        public static string url = "https://localhost:7101/api/";
 
         // Список продуктов
         [ObservableProperty]
@@ -34,13 +38,12 @@ namespace PetrolStationNetwork.ViewModels
 
         public VMProducts()
         {
-            dataBase.Products.Load();
             bthAddContent = "Добавить";
 
-            this.products = new ObservableCollection<Models.Product>(dataBase.Products.ToList());
+            LoadProducts(); // Загружаем товары
 
             if (UserSession.Role == "leader") Delete = true;
-            Add = new RelayCommand(() =>
+            Add = new RelayCommand(async () =>
             {
                 // Проверяем, что запись добавлется
                 if (UserSession.Role == "leader" && selectedItem == null)
@@ -48,22 +51,28 @@ namespace PetrolStationNetwork.ViewModels
                     if (productName != null)
                     {
                         // Проверяем есть ли уже элемент такой продуктов с таким же наименованием
-
                         var existingItem = products.FirstOrDefault(x => x.Name == productName);
                         if (existingItem != null)
                         {
                             MessageBox.Show("Такой товар уже существует", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
                             return;
                         }
-                        // Просто добавляем новую запись
+                        // Просто добавляем новую запись, отправляем данные на сервер
                         else
                         {
-                            Models.Product newProductItem = new Models.Product()
+                            var dataProduct = new Models.Product()
                             {
                                 Name = productName
                             };
-                            dataBase.Products.Add(newProductItem);
-                            products.Add(newProductItem);
+                            var newProduct = await Data.Common.ProductsCommon.Add(dataProduct);
+                            if (newProduct != null) Products.Add(newProduct);
+                            else
+                            {
+                                MessageBox.Show("Ошибка добавления", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                            ProductName = null;
+                            SelectedItem = null;
+                            BthAddContent = "Добавить";
                         }
                     }
                     else
@@ -78,23 +87,33 @@ namespace PetrolStationNetwork.ViewModels
                     // Проверяем что все поля заполнены
                     if (ProductName != null)
                     {
-                        selectedItem.Name = productName;
+                        var dataProduct = new Models.Product()
+                        {
+                            id = selectedItem.id,
+                            Name = ProductName
+                        };
+                        var updatedProduct = await Data.Common.ProductsCommon.Update(dataProduct);
+                        if (updatedProduct != null) selectedItem.Name = ProductName;
+                        else
+                        {
+                            MessageBox.Show("Ошибка добавления", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                        ProductName = null;
                         SelectedItem = null;
                         BthAddContent = "Добавить";
                     }
                     else { MessageBox.Show("Проверьте заполненность всех полей", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
                 }
                 else { MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
-                dataBase.SaveChanges();
             });
 
-            OnDelete = new RelayCommand(() => {
+            OnDelete = new RelayCommand(async () =>
+            {
                 if (Delete && SelectedItem != null)
                 {
-                    dataBase.Products.Remove(SelectedItem);
-                    products?.Remove(SelectedItem);
+                    var deleteStatus = await Data.Common.ProductsCommon.Delete(selectedItem.id);
+                    if (deleteStatus != false) products?.Remove(SelectedItem);
                     ProductName = null;
-                    dataBase.SaveChanges();
                     SelectedItem = null;
                     BthAddContent = "Добавить";
                 }
@@ -104,6 +123,15 @@ namespace PetrolStationNetwork.ViewModels
             Exit = new RelayCommand(() => {
                 MainWindow.init.frame.Navigate(new Views.Pages.Main(UserSession.Full_name));
             });
+        }
+
+        /// <summary>
+        /// Асинхронный метод для получения списка товаров
+        /// </summary>
+        /// <returns>Список типа ObservableObject</returns>
+        private async Task LoadProducts()
+        {
+            Products = await Data.Common.ProductsCommon.Get();
         }
 
         // Переменная для проверки на удаление записи
