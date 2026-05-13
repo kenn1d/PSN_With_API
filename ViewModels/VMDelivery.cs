@@ -14,19 +14,8 @@ namespace PetrolStationNetwork.ViewModels
 {
     public partial class VMDelivery : ObservableObject
     {
-        private DataContext dataBase = new DataContext();
-
         [ObservableProperty]
         private ObservableCollection<Delivery> deliveries;
-
-        [ObservableProperty]
-        private ObservableCollection<Supplier> suppliers;
-
-        [ObservableProperty]
-        private ObservableCollection<WarehouseItem> warehouseItems;
-
-        [ObservableProperty]
-        private ObservableCollection<DeliveryItem> deliveryItems;
 
         [ObservableProperty]
         private string serialNumber;
@@ -46,20 +35,14 @@ namespace PetrolStationNetwork.ViewModels
 
         public VMDelivery()
         {
-            dataBase.Deliveries.Load();
-            dataBase.Suppliers.Load();
-            dataBase.WarehouseItems.Load();
-            dataBase.DeliveryItems.Load();
             BthAddContent = "Добавить";
 
-            this.deliveries = new ObservableCollection<Delivery>(dataBase.Deliveries.ToList());
-            this.suppliers = new ObservableCollection<Supplier>(dataBase.Suppliers.ToList());
-            this.warehouseItems = new ObservableCollection<WarehouseItem>(dataBase.WarehouseItems.ToList());
+            LoadDeliveries();
             
             if (UserSession.Role == "leader") Delete = true;
-            Add = new RelayCommand(() => {
+            Add = new RelayCommand(async () => {
                 // Проверяем, что запись добавлется
-                var existDelivery = deliveries.FirstOrDefault();
+                var existDelivery = deliveries.FirstOrDefault(x => x.Serial_number == serialNumber);
                 if (UserSession.Role == "Supplier" && selectedItem == null)
                 {
                     // Проверяем на дублирование
@@ -68,15 +51,26 @@ namespace PetrolStationNetwork.ViewModels
                         // Проверяем заполненность полей
                         if (serialNumber != null)
                         {
-                            Delivery newDelivery = new Delivery()
+                            Delivery dataDelivery = new Delivery()
                             {
                                 Supplier_id = UserSession.Id,
                                 Serial_number = serialNumber,
                                 Date = DateTime.Now,
                                 Status = "В ожидании"
                             };
-                            dataBase.Deliveries.Add(newDelivery);
-                            deliveries.Add(newDelivery);
+                            var newDelivery = await Data.Common.DeliveriesCommon.Add(dataDelivery);
+                            if (newDelivery != null)
+                            {
+                                deliveries.Add(newDelivery);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Ошибка добавления", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                            SerialNumber = "";
+                            SelectedStatus = null;
+                            SelectedItem = null;
+                            BthAddContent = "Добавить";
                         }
                         else { MessageBox.Show("Проверьте заполненность всех полей", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
                     }
@@ -101,22 +95,23 @@ namespace PetrolStationNetwork.ViewModels
                     else { 
                         MessageBox.Show("Редактирование невозможно. Поставка была принята", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop);
                         SerialNumber = "";
+                        SelectedStatus = null;
                         SelectedItem = null;
                         BthAddContent = "Добавить";
                         return;
                     }
                 }
                 else { MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
-                dataBase.SaveChanges();
             });
 
-            OnDelete = new RelayCommand(() => { 
+            OnDelete = new RelayCommand(async () => { 
                 if (Delete && SelectedItem != null)
                 {
-                    dataBase.Deliveries.Remove(SelectedItem);
-                    deliveries.Remove(SelectedItem);
-                    dataBase.SaveChanges();
+                    var deleteStatus = await Data.Common.DeliveriesCommon.Delete(SelectedItem.id);
+                    if (deleteStatus != false) deliveries.Remove(SelectedItem);
+                    else MessageBox.Show("Возникла ошибка при удалении", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                     SerialNumber = "";
+                    SelectedStatus = null;
                     SelectedItem = null;
                     BthAddContent = "Добавить";
                 }
@@ -144,32 +139,37 @@ namespace PetrolStationNetwork.ViewModels
         }
 
         /// <summary>
+        /// Асинхронный метод для получения списка поставок
+        /// </summary>
+        /// <returns>Список типа ObservableObject</returns>
+        private async Task LoadDeliveries()
+        {
+            this.Deliveries = await Data.Common.DeliveriesCommon.Get();
+        }
+
+        /// <summary>
         /// Метод для обновления записи, проверяет заполненность полей и принадлежность записи юзеру, если юзер поставщик
         /// </summary>
-        private void UpdateRecord()
+        private async Task UpdateRecord()
         {
             // Проверяем что все поля заполнены
-            if (serialNumber != null)
+            if (SerialNumber != null && SelectedStatus != null)
             {
-                // Если статус "Принята", то копируем поставку в таблицу склада, иначе просто обновляем статус и серийный номер
-                if (selectedStatus == "Принята")
+                Delivery dataDelivery = new Delivery()
                 {
-                    this.DeliveryItems = new ObservableCollection<DeliveryItem>(dataBase.DeliveryItems.Where(x => x.Delivery_id == selectedItem.id).ToList());
-                    foreach (var i in this.DeliveryItems)
-                    {
-                        WarehouseItem newWarehouseItem = new WarehouseItem()
-                        {
-                            Delivery_items_id = i.id,
-                            Product_id = i.Product_id,
-                            Count = i.Count,
-                            Exp_date = i.Exp_date,
-                            Position = "Н/Д"
-                        };
-                        dataBase.WarehouseItems.Add(newWarehouseItem);
-                    }
+                    id = SelectedItem.id,
+                    Serial_number = SerialNumber,
+                    Status = SelectedStatus
+                };
+                var updateDelivery = await Data.Common.DeliveriesCommon.Update(dataDelivery);
+                if (updateDelivery != null)
+                {
+                    SelectedItem.Serial_number = dataDelivery.Serial_number;
+                    SelectedItem.Status = dataDelivery.Status;
                 }
-                selectedItem.Serial_number = serialNumber;
-                selectedItem.Status = selectedStatus;
+                else MessageBox.Show("Ошибка при обновлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                SerialNumber = "";
+                SelectedStatus = null;
                 SelectedItem = null;
                 BthAddContent = "Добавить";
             }

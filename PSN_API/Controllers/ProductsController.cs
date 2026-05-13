@@ -49,7 +49,7 @@ namespace PSN_API.Controllers
         /// Добавление записи нового продукта
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
-        /// <param name="name">Наименование продукта</param>
+        /// <param name="product">Новый объект</param>
         /// <returns></returns>
         [Route("add")]
         [HttpPost]
