@@ -16,7 +16,7 @@
            Foreground="#1565C0"
            HorizontalAlignment="Center"
            VerticalAlignment="Top" Width="780"/>
-        <Grid x:Name="buttons" HorizontalAlignment="Center" VerticalAlignment="Top" Width="780" Height="385" Margin="0,55,0,0">
+        <Grid x:Name="buttons" Width="780" Margin="10,55,10,35">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -33,7 +33,7 @@
                 FontWeight="SemiBold"
                 Padding="0"
                 Cursor="Hand"
-                HorizontalContentAlignment="Center" Margin="10,10,10,340" Grid.Column="0" IsEnabled="False">
+                HorizontalContentAlignment="Center" Margin="10,10,10,0" Grid.Column="0" IsEnabled="False" Height="35" VerticalAlignment="Top">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="4"/>
@@ -50,7 +50,7 @@
                 FontWeight="SemiBold"
                 Padding="0"
                 Cursor="Hand"
-                HorizontalContentAlignment="Center" Margin="10,55,10,295" Grid.Column="0" IsEnabled="False">
+                HorizontalContentAlignment="Center" Margin="10,55,10,0" Grid.Column="0" IsEnabled="False" Height="35" VerticalAlignment="Top">
                 <Button.Resources>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="CornerRadius" Value="4"/>
@@ -67,7 +67,7 @@
                 FontWeight="SemiBold"
                 Padding="0"
                 Cursor="Hand"
-                HorizontalContentAlignment="Center" Margin="10,100,10,250" Grid.Column="0" IsEnabled="False">
+                HorizontalContentAlignment="Center" Margin="10,100,10,0" Grid.Column="0" IsEnabled="False" Height="35" VerticalAlignment="Top">
                 <Button.Resources>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="CornerRadius" Value="4"/>
@@ -85,7 +85,7 @@
                 FontWeight="SemiBold"
                 Padding="0"
                 Cursor="Hand"
-                HorizontalContentAlignment="Center" Margin="10,10,10,340" Grid.Column="1" IsEnabled="False">
+                HorizontalContentAlignment="Center" Margin="10,10,10,0" Grid.Column="1" IsEnabled="False" Height="35" VerticalAlignment="Top">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="4"/>
@@ -102,7 +102,7 @@
                 FontWeight="SemiBold"
                 Padding="0"
                 Cursor="Hand"
-                HorizontalContentAlignment="Center" Margin="10,55,10,295" Grid.Column="1" IsEnabled="False">
+                HorizontalContentAlignment="Center" Margin="10,55,10,0" Grid.Column="1" IsEnabled="False" Height="35" VerticalAlignment="Top">
                 <Button.Resources>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="CornerRadius" Value="4"/>
@@ -120,7 +120,7 @@
                 FontWeight="SemiBold"
                 Padding="0"
                 Cursor="Hand"
-                HorizontalContentAlignment="Center" Margin="10,10,10,340" Grid.Column="2" IsEnabled="False">
+                HorizontalContentAlignment="Center" Margin="10,10,10,0" Grid.Column="2" IsEnabled="False" Height="35" VerticalAlignment="Top">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="4"/>
@@ -137,7 +137,7 @@
                 FontWeight="SemiBold"
                 Padding="0"
                 Cursor="Hand"
-                HorizontalContentAlignment="Center" Margin="10,55,10,295" Grid.Column="2" IsEnabled="False">
+                HorizontalContentAlignment="Center" Margin="10,55,10,0" Grid.Column="2" IsEnabled="False" Height="35" VerticalAlignment="Top">
                 <Button.Resources>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="CornerRadius" Value="4"/>
@@ -154,35 +154,35 @@
                 FontWeight="SemiBold"
                 Padding="0"
                 Cursor="Hand"
-                HorizontalContentAlignment="Center" Margin="10,100,10,250" Grid.Column="2" IsEnabled="False">
+                HorizontalContentAlignment="Center" Margin="10,100,10,0" Grid.Column="2" IsEnabled="False" Height="35" VerticalAlignment="Top">
                 <Button.Resources>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="CornerRadius" Value="4"/>
                     </Style>
                 </Button.Resources>
             </Button>
-
-            <Button
-                Command="{Binding Exit}"
-                Content="Выйти"
-                Background="#F44336"
-                Foreground="White"
-                BorderThickness="0"
-                FontSize="14"
-                FontWeight="SemiBold"
-                Padding="0"
-                Width="75"
-                Height="25"
-                Cursor="Hand"
-                HorizontalContentAlignment="Center"
-                VerticalAlignment="Bottom"
-                HorizontalAlignment="Left" Margin="10,0,0,0">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="4"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
         </Grid>
+
+        <Button
+        Command="{Binding Exit}"
+        Content="Выйти"
+        Background="#F44336"
+        Foreground="White"
+        BorderThickness="0"
+        FontSize="14"
+        FontWeight="SemiBold"
+        Padding="0"
+        Width="75"
+        Height="25"
+        Cursor="Hand"
+        HorizontalContentAlignment="Center"
+        VerticalAlignment="Bottom"
+        HorizontalAlignment="Left" Margin="10,0,0,5">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="4"/>
+                </Style>
+            </Button.Resources>
+        </Button>
     </Grid>
 </Page>
