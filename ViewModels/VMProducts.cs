@@ -63,6 +63,7 @@ namespace PetrolStationNetwork.ViewModels
                             var newProduct = await Data.Common.ProductsCommon.Add(dataProduct);
                             if (newProduct != null) Products.Add(newProduct);
                             else MessageBox.Show("Ошибка при добавлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+
                             ProductName = null;
                             SelectedItem = null;
                             BthAddContent = "Добавить";
@@ -88,6 +89,7 @@ namespace PetrolStationNetwork.ViewModels
                         var updatedProduct = await Data.Common.ProductsCommon.Update(dataProduct);
                         if (updatedProduct != null) selectedItem.Name = dataProduct.Name;
                         else MessageBox.Show("Ошибка при обновлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+
                         ProductName = null;
                         SelectedItem = null;
                         BthAddContent = "Добавить";
@@ -104,6 +106,7 @@ namespace PetrolStationNetwork.ViewModels
                     var deleteStatus = await Data.Common.ProductsCommon.Delete(SelectedItem.id);
                     if (deleteStatus != false) products?.Remove(SelectedItem);
                     else MessageBox.Show("Возникла ошибка при удалении", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+
                     ProductName = null;
                     SelectedItem = null;
                     BthAddContent = "Добавить";

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PSN_API.Models
@@ -22,14 +23,15 @@ namespace PSN_API.Models
         [ObservableProperty]
         public string position;
 
+        [ForeignKey("Product_id")] // Явно указваем название внешнего ключа для корректной работы EF
         public virtual Product Product { get; set; }
-
+        [ForeignKey("Delivery_items_id")]
         public virtual DeliveryItem DeliveryItem { get; set; }
 
         [NotMapped]
-        public string ProductName => Product.Name;
+        public string ProductName => Product?.Name ?? "Нет названия";
 
         [NotMapped]
-        public string DeliverySerialNumber => DeliveryItem.Delivery.Serial_number;
+        public string DeliverySerialNumber => DeliveryItem?.Delivery?.Serial_number ?? "Нет номера";
     }
 }

@@ -92,7 +92,7 @@ namespace PSN_API.Classes
         /// </summary>
         /// <param name="token">Токен пользователя</param>
         /// <returns>Роль пользователя или null</returns>
-        public static int? GetRoleFromToken(string token)
+        public static string? GetRoleFromToken(string token)
         {
             try
             {
@@ -113,9 +113,9 @@ namespace PSN_API.Classes
                 // Преобразуем валидированный токен в JwtSecurityToken
                 JwtSecurityToken JwtToken = (JwtSecurityToken)validatedToken;
                 // Извлекам значение claim с именем "Role"
-                string Role = JwtToken.Claims.First(x => x.Type == ClaimTypes.Role || x.Type == "Role").Value;
+                string Role = JwtToken.Claims.First(x => x.Type == ClaimTypes.Role || x.Type == "role").Value;
                 // Преобразуем строку в число и возвращаем
-                return int.Parse(Role);
+                return Role;
             }
             catch
             {

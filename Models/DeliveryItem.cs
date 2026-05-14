@@ -25,9 +25,9 @@ namespace PetrolStationNetwork.Models
 
 
         [NotMapped]
-        public string SerialNumber => Delivery.Serial_number;
+        public string SerialNumber => Delivery?.Serial_number ?? "Нет номера";
 
         [NotMapped]
-        public string ProductName => Product.Name;
+        public string ProductName => Product?.Name ?? "Нет названия";
     }
 }

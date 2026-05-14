@@ -161,8 +161,7 @@ namespace PetrolStationNetwork.ViewModels
                 var updateDelivery = await Data.Common.DeliveriesCommon.Update(dataDelivery);
                 if (updateDelivery != null)
                 {
-                    SelectedItem.Serial_number = dataDelivery.Serial_number;
-                    SelectedItem.Status = dataDelivery.Status;
+                    LoadDeliveries();
                 }
                 else MessageBox.Show("Ошибка при обновлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                 SerialNumber = "";

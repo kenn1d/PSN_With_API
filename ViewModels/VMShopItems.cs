@@ -41,7 +41,6 @@ namespace PetrolStationNetwork.ViewModels
         public ICommand OnDelete { get; }
         public ICommand OnSale { get; }
         
-        //TODO: Реализовать обработку ошибок при вводе не числа в TextBox
         public VMShopItems()
         {
             dataBase.ShopItems.Load();

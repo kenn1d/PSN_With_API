@@ -5,7 +5,7 @@ using System.Net.Http;
 
 namespace PetrolStationNetwork.Data.Common
 {
-    public class DeliveriesCommon
+    public class DeliveryItemsCommon
     {
         /// <summary>Базовый URL API для пользовательских операций</summary>
         public static string url = "https://localhost:7101/api/";
@@ -14,13 +14,13 @@ namespace PetrolStationNetwork.Data.Common
         /// Асинхронный метод получения записей
         /// </summary>
         /// <returns>Список записей</returns>
-        public static async Task<ObservableCollection<Models.Delivery>> Get()
+        public static async Task<ObservableCollection<Models.DeliveryItem>> Get()
         {
             // Создаём Http клиент
             using (HttpClient Client = new HttpClient())
             {
                 // Создаём get запрос
-                using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Get, url + "Deliveries/get"))
+                using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Get, url + "DeliveryItems/get"))
                 {
                     Request.Headers.Add("token", UserSession.Token);
                     var Response = await Client.SendAsync(Request);
@@ -29,10 +29,10 @@ namespace PetrolStationNetwork.Data.Common
                         // Асинхронно читаем плученные данные
                         string sResponse = await Response.Content.ReadAsStringAsync();
                         // Десериализуем данные в список
-                        List<Models.Delivery> existDelivery = JsonConvert.DeserializeObject<List<Models.Delivery>>(sResponse) ?? new List<Models.Delivery>();
+                        List<Models.DeliveryItem> existDeliveryItems = JsonConvert.DeserializeObject<List<Models.DeliveryItem>>(sResponse) ?? new List<Models.DeliveryItem>();
                         // Преобразуем в тип ObservableCollection
-                        ObservableCollection<Models.Delivery> deliveries = new ObservableCollection<Models.Delivery>(existDelivery);
-                        return deliveries;
+                        ObservableCollection<Models.DeliveryItem> items = new ObservableCollection<Models.DeliveryItem>(existDeliveryItems);
+                        return items;
                     }
                 }
             }
@@ -42,18 +42,18 @@ namespace PetrolStationNetwork.Data.Common
         /// <summary>
         /// Асинхронный метод добавления записи
         /// </summary>
-        /// <param name="delivery">Объект для добавления</param>
+        /// <param name="deliveryItem">Объект для добавления</param>
         /// <returns>Созданный объект или null</returns>
-        public static async Task<Models.Delivery> Add(Models.Delivery delivery)
+        public static async Task<Models.DeliveryItem> Add(Models.DeliveryItem deliveryItem)
         {
             using (HttpClient Client = new HttpClient())
             {
-                using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Post, url + "Deliveries/add"))
+                using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Post, url + "DeliveryItems/add"))
                 {
                     // В заголовок запроса добавляем токен
                     Request.Headers.Add("token", UserSession.Token);
                     // Сериализуем новый товар в Json формат
-                    string JsonData = JsonConvert.SerializeObject(delivery);
+                    string JsonData = JsonConvert.SerializeObject(deliveryItem);
                     // В тело запроса добавляем товар в Json формате
                     Request.Content = new StringContent(JsonData, System.Text.Encoding.UTF8, "application/json");
                     // Асинхронно отправляем запрос
@@ -63,10 +63,10 @@ namespace PetrolStationNetwork.Data.Common
                     {
                         // Асинхронно читаем полученный объект
                         string sResponse = await Response.Content.ReadAsStringAsync();
-                        // Конверируем обратно из Json в объект Models.Delivery
-                        Models.Delivery newDelivery = JsonConvert.DeserializeObject<Models.Delivery>(sResponse) ?? new Models.Delivery();
+                        // Конверируем обратно из Json в объект Models.DeliveryItem
+                        Models.DeliveryItem newDeliveryItem = JsonConvert.DeserializeObject<Models.DeliveryItem>(sResponse) ?? new Models.DeliveryItem();
                         // Возвращаем новую запись
-                        return newDelivery;
+                        return newDeliveryItem;
                     }
                 }
             }
@@ -76,23 +76,23 @@ namespace PetrolStationNetwork.Data.Common
         /// <summary>
         /// Асинхронный метод изменения записи
         /// </summary>
-        /// <param name="delivery">Изменяемый объект с новыми данными</param>
+        /// <param name="deliveryItem">Изменяемый объект с новыми данными</param>
         /// <returns>Изменённый объект или null</returns>
-        public static async Task<Models.Delivery> Update(Models.Delivery delivery)
+        public static async Task<Models.DeliveryItem> Update(Models.DeliveryItem deliveryItem)
         {
             using (HttpClient Client = new HttpClient())
             {
-                using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Put, url + "Deliveries/update"))
+                using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Put, url + "DeliveryItems/update"))
                 {
                     Request.Headers.Add("token", UserSession.Token);
-                    string JsonData = JsonConvert.SerializeObject(delivery);
+                    string JsonData = JsonConvert.SerializeObject(deliveryItem);
                     Request.Content = new StringContent(JsonData, System.Text.Encoding.UTF8, "application/json");
                     var Response = await Client.SendAsync(Request);
                     if (Response.StatusCode == HttpStatusCode.OK)
                     {
                         string sResponse = await Response.Content.ReadAsStringAsync();
-                        Models.Delivery updateDelivery = JsonConvert.DeserializeObject<Models.Delivery>(sResponse) ?? new Models.Delivery();
-                        return updateDelivery;
+                        Models.DeliveryItem updateDeliveryItem = JsonConvert.DeserializeObject<Models.DeliveryItem>(sResponse) ?? new Models.DeliveryItem();
+                        return updateDeliveryItem;
                     }
                 }
             }
@@ -108,7 +108,7 @@ namespace PetrolStationNetwork.Data.Common
         {
             using (HttpClient Client = new HttpClient())
             {
-                using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Delete, url + "Deliveries/delete"))
+                using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Delete, url + "DeliveryItems/delete"))
                 {
                     Request.Headers.Add("token", UserSession.Token);
                     Dictionary<string, string> FormData = new Dictionary<string, string>()

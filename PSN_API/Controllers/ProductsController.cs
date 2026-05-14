@@ -50,7 +50,7 @@ namespace PSN_API.Controllers
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="product">Новый объект</param>
-        /// <returns></returns>
+        /// <returns>Новый объект или ошибка</returns>
         [Route("add")]
         [HttpPost]
         public ActionResult Add([FromHeader] string token, [FromBody] Models.Product product)

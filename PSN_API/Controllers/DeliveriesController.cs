@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PSN_API.Classes;
 using PSN_API.Data;
 using PSN_API.Models;
@@ -48,7 +49,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Добавление записи нового продукта
+        /// Добавление записи
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="delivery">Новый объект</param>
@@ -76,6 +77,10 @@ namespace PSN_API.Controllers
                 dataBase.SaveChanges();
 
                 return Ok(newDelivery);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is MySqlConnector.MySqlException Ex && Ex.Number == 1452)
+            {
+                return BadRequest("Ошибка: Текущий пользователь не зарегистрирован как поставщик");
             }
             catch (Exception ex)
             {
@@ -105,7 +110,8 @@ namespace PSN_API.Controllers
                 if (delivery.Status == "Принята")
                 {
                     // Получаем содержимое поставки
-                    var deliveryItems = new ObservableCollection<DeliveryItem>(dataBase.DeliveryItems.Where(x => x.Delivery_id == delivery.id).ToList());
+                    var deliveryItems = new ObservableCollection<DeliveryItem>(dataBase.DeliveryItems
+                        .Where(x => x.Delivery_id == delivery.id).ToList());
                     foreach (var i in deliveryItems)
                     {
                         // Создаём новый объект на складе
