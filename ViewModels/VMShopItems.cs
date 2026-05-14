@@ -43,71 +43,34 @@ namespace PetrolStationNetwork.ViewModels
         
         public VMShopItems()
         {
-            dataBase.ShopItems.Load();
             bthAddContent = "Добавить";
 
-            this.shopItems = new ObservableCollection<Models.ShopItem>(dataBase.ShopItems.Include(x => x.WarehouseItem).ToList());
-            this.warehouseItems = new ObservableCollection<Models.WarehouseItem>(dataBase.WarehouseItems.ToList());
+            LoadRecords();
 
             if (UserSession.Role == "leader" || UserSession.Role == "worker") Delete = true;
-            Add = new RelayCommand(() => {
+            Add = new RelayCommand(async () => {
                 // Проверяем, что запись добавлется
                 if (selectedItem == null)
                 {
                     if (selectedWarehouseItem != 0 && count >= 0)
                     {
-                        var WI = warehouseItems.FirstOrDefault(x => x.id == selectedWarehouseItem);
-
-                        // Проверяем есть ли уже элемент с такой позицией
-                        // Если true то изменяем количество - обновляем запись
-                        var existingItem = shopItems.FirstOrDefault(x => x.ItemPosition == warehouseItems.First(x => x.id == selectedWarehouseItem).Position);
-                        if (existingItem != null)
+                        var dataItem = new Models.ShopItem()
                         {
-                            // Обновляем остатки
-                            if (WI != null) 
-                            {
-                                // Cчитаем разницу между тем что было и тем что ввели
-                                int diff = count - (int)existingItem.Count ?? 0;
-                                if (WI.Count >= diff)
-                                {
-                                    WI.Count -= diff; // Если diff > 0, забираем со склада, иначе возвращаем на склад
-                                    existingItem.Count = count;
-                                }
-                                else
-                                {
-                                    MessageBox.Show("На складе недостаточно товара", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                                    return;
-                                }
-                            }
-                        }
-                        // Просто добавляем новую запись
-                        else
+                            Warehouse_item_id = selectedWarehouseItem,
+                            Count = count,
+                            WarehouseItem = WarehouseItems.FirstOrDefault(x => x.id == selectedWarehouseItem)
+                        };
+                        var newItem = await Data.Common.ShopItemsCommon.Add(dataItem);
+                        if (newItem != null)
                         {
-                            // Обновляем остатки
-                            if (WI != null)
-                            {
-                                if (WI.Count >= (int)count)
-                                {
-                                    WI.Count -= (int)count;
-
-                                    Models.ShopItem newShopItem = new Models.ShopItem()
-                                    {
-                                        Warehouse_item_id = selectedWarehouseItem,
-                                        Count = count
-                                    };
-                                    dataBase.ShopItems.Add(newShopItem);
-                                    ShopItems.Add(newShopItem);
-                                }
-                                else
-                                {
-                                    MessageBox.Show("На складе недостаточно товара", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                                    return;
-                                }
-                            }
+                            await LoadRecords();
                         }
+                        else MessageBox.Show("Ошибка при добавлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+
                         SelectedWarehouseItem = 0;
                         Count = null;
                         SelectedItem = null;
+                        BthAddContent = "Добавить";
                     }
                     else
                     {
@@ -121,27 +84,20 @@ namespace PetrolStationNetwork.ViewModels
                     // Проверяем что все поля заполнены
                     if (selectedWarehouseItem != 0 && count != null)
                     {
-                        var WI = warehouseItems.FirstOrDefault(x => x.id == selectedWarehouseItem);
-                        // Обновляем остатки
-                        if (WI != null)
+                        var dataItem = new Models.ShopItem()
                         {
-                            // Cчитаем разницу между тем что было и тем что ввели
-                            int diff = (int)count - (selectedItem.Count ?? 0);
-
-                            if (WI.Count >= diff)
-                            {
-                                WI.Count -= diff;
-                                selectedItem.Warehouse_item_id = selectedWarehouseItem;
-                                selectedItem.Count = count;
-                            }
-                            else
-                            {
-                                MessageBox.Show("На складе недостаточно товара", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                                return;
-                            }
+                            id = selectedItem.id,
+                            Warehouse_item_id = selectedWarehouseItem,
+                            Count = count,
+                            WarehouseItem = WarehouseItems.FirstOrDefault(x => x.id == SelectedWarehouseItem)
+                        };
+                        var newItem = await Data.Common.ShopItemsCommon.Update(dataItem);
+                        if (newItem != null)
+                        {
+                            await LoadRecords();
                         }
-                        selectedItem.Warehouse_item_id = selectedWarehouseItem;
-                        selectedItem.Count = count;
+                        else MessageBox.Show("Ошибка при изменении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+
                         SelectedWarehouseItem = 0;
                         Count = null;
                         SelectedItem = null;
@@ -150,22 +106,15 @@ namespace PetrolStationNetwork.ViewModels
                     else { MessageBox.Show("Проверьте заполненность всех полей", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
                 }
                 else { MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
-                dataBase.SaveChanges();
             });
 
-            OnDelete = new RelayCommand(() => {
+            OnDelete = new RelayCommand(async () => {
                 if (Delete && SelectedItem != null)
                 {
-                    // Остатки возвращаем на склад
-                    var WI = warehouseItems.FirstOrDefault(x => x.id == SelectedItem.Warehouse_item_id);
-                    if (WI != null)
-                    {
-                        WI.Count += (int)SelectedItem.Count;
-                    }
+                    var deleteStatus = await Data.Common.ShopItemsCommon.Delete(SelectedItem.id);
+                    if (deleteStatus != false) await LoadRecords();
+                    else MessageBox.Show("Ошибка при удалении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
 
-                    dataBase.ShopItems.Remove(SelectedItem);
-                    shopItems.Remove(SelectedItem);
-                    dataBase.SaveChanges();
                     SelectedWarehouseItem = 0;
                     Count = null;
                     SelectedItem = null;
@@ -174,22 +123,15 @@ namespace PetrolStationNetwork.ViewModels
                 else MessageBox.Show("Выберите запись для удаления", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop);
             });
 
-            OnSale = new RelayCommand(() =>
+            OnSale = new RelayCommand(async () =>
             {
                 if (selectedItem != null && count >= 0)
                 {
-                    if (selectedItem.Count >= count)
-                    {
-                        selectedItem.Count -= count;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Недостаточно товара для продажи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop);
-                        return;
-                    }
+                    var itemSale = await Data.Common.ShopItemsCommon.Sale(SelectedItem.id, Count ?? 0);
+                    if (itemSale != null) await LoadRecords();
+                    else MessageBox.Show("Ошибка при продаже", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 else { MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
-                dataBase.SaveChanges();
                 SelectedWarehouseItem = 0;
                 Count = null;
                 SelectedItem = null;
@@ -199,6 +141,16 @@ namespace PetrolStationNetwork.ViewModels
             Exit = new RelayCommand(() => {
                 MainWindow.init.frame.Navigate(new Views.Pages.Main(UserSession.Full_name));
             });
+        }
+
+        /// <summary>
+        /// Асинхронный метод для загрузки записей
+        /// </summary>
+        /// <returns>Список записей</returns>
+        public async Task LoadRecords()
+        {
+            ShopItems = await Data.Common.ShopItemsCommon.Get();
+            WarehouseItems = await Data.Common.WarehouseItemsCommon.Get();
         }
 
         // Переменная для проверки на удаление записи

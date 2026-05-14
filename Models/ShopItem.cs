@@ -16,6 +16,6 @@ namespace PetrolStationNetwork.Models
         public virtual WarehouseItem WarehouseItem { get; set; }
 
         [NotMapped]
-        public string ItemPosition => WarehouseItem.Position;
+        public string ItemPosition => WarehouseItem?.Position ?? "Н/Д";
     }
 }
