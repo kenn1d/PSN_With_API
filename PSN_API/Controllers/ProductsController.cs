@@ -36,6 +36,9 @@ namespace PSN_API.Controllers
                 int? UserId = JwtToken.GetUserIdFromToken(token);
                 if (UserId == null) return Unauthorized(); // StatusCode 401
 
+                string? UserRole = JwtToken.GetRoleFromToken(token);
+                if (UserRole == "worker") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+
                 List<Models.Product> products = dataBase.Products.ToList();
                 return Ok(products);
             }
@@ -59,6 +62,9 @@ namespace PSN_API.Controllers
             {
                 int? UserId = JwtToken.GetUserIdFromToken(token);
                 if (UserId == null) return Unauthorized();
+
+                string? UserRole = JwtToken.GetRoleFromToken(token);
+                if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 var existingProduct = dataBase.Products.FirstOrDefault(x => x.Name == product.Name);
                 if (existingProduct != null) return StatusCode(409);
@@ -93,6 +99,9 @@ namespace PSN_API.Controllers
                 int? UserId = JwtToken.GetUserIdFromToken(token);
                 if (UserId == null) return Unauthorized();
 
+                string? UserRole = JwtToken.GetRoleFromToken(token);
+                if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+
                 Models.Product existProduct = dataBase.Products.FirstOrDefault(x => x.id == product.id);
                 if (existProduct == null) return NotFound();
 
@@ -121,6 +130,9 @@ namespace PSN_API.Controllers
             {
                 int? UserId = JwtToken.GetUserIdFromToken(token);
                 if (UserId == null) return Unauthorized();
+
+                string? UserRole = JwtToken.GetRoleFromToken(token);
+                if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 var existProduct = dataBase.Products.FirstOrDefault(x => x.id == id);
                 if (existProduct == null) return NotFound();
