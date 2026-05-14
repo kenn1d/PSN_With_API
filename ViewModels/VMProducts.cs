@@ -9,9 +9,6 @@ namespace PetrolStationNetwork.ViewModels
 {
     public partial class VMProducts : ObservableObject
     {
-        /// <summary>Базовый URL API для пользовательских операций</summary>
-        public static string url = "https://localhost:7101/api/";
-
         // Список продуктов
         [ObservableProperty]
         private ObservableCollection<Models.Product> products;

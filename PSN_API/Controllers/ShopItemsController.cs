@@ -220,7 +220,8 @@ namespace PSN_API.Controllers
         /// Продажа позиции (обновление записи)
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
-        /// <param name="shopItem">Обновлённые данные записи</param>
+        /// <param name="id">id позиции для продажи</param>
+        /// <param name="count">Количество товаров в позиции</param>
         /// <returns>Обновлённая запись</returns>
         [Route("sale")]
         [HttpPut]

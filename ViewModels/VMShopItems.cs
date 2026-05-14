@@ -10,8 +10,6 @@ namespace PetrolStationNetwork.ViewModels
 {
     public partial class VMShopItems : ObservableObject
     {
-        private DataContext dataBase = new DataContext();
-
         // Список поставок
         [ObservableProperty]
         private ObservableCollection<Models.ShopItem> shopItems;
