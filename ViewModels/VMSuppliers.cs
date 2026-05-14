@@ -5,21 +5,14 @@ using PetrolStationNetwork.Data;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace PetrolStationNetwork.ViewModels
 {
     public partial class VMSuppliers : ObservableObject
     {
-        private DataContext dataBase = new DataContext();
-
         // Список сотрудников
         [ObservableProperty]
         private ObservableCollection<Models.User> users;
-
-        // Список сотрудников
-        [ObservableProperty]
-        private ObservableCollection<Models.Staff> staff;
 
         // Список поставщиков
         [ObservableProperty]
@@ -47,41 +40,29 @@ namespace PetrolStationNetwork.ViewModels
 
         public VMSuppliers()
         {
-            dataBase.Users.Load();
-            dataBase.Staff.Load();
-            dataBase.Suppliers.Load();
             bthAddContent = "Добавить";
 
-            this.users = new ObservableCollection<Models.User>(dataBase.Users.ToList());
-            this.staff = new ObservableCollection<Models.Staff>(dataBase.Staff.ToList());
-            this.suppliers = new ObservableCollection<Models.Supplier>(dataBase.Suppliers.ToList());
+            LoadRecords();
 
             if (UserSession.Role == "leader") Delete = true;
-            Add = new RelayCommand(() =>
+            Add = new RelayCommand(async () =>
             {
                 // Проверяем, что запись добавлется
                 if (UserSession.Role == "leader" && selectedItem == null)
                 {
                     if (user != 0 && company != null)
                     {
-                        // Проверяем есть ли у пользователя какие-либо роли
-                        var existingStaff = staff.FirstOrDefault(x => x.user_id == user);
-                        var existingSupplier = suppliers.FirstOrDefault(x => x.user_id == user);
-                        if (existingStaff == null && existingSupplier == null)
+                        var dataSupplier = new Models.Supplier()
                         {
-                            Models.Supplier newSupllier = new Models.Supplier()
-                            {
-                                user_id = user,
-                                Company_name = company
-                            };
-                            dataBase.Suppliers.Add(newSupllier);
-                            suppliers.Add(newSupllier);
-                        }
-                        else
+                            user_id = user,
+                            Company_name = company
+                        };
+                        var addSupplier = await Data.Common.SuppliersCommon.Add(dataSupplier);
+                        if (addSupplier != null)
                         {
-                            MessageBox.Show("У пользователя уже есть роль", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return;
+                            await LoadRecords();
                         }
+                        else MessageBox.Show("Ошибка при добавлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     else
                     {
@@ -95,35 +76,35 @@ namespace PetrolStationNetwork.ViewModels
                     // Проверяем что все поля заполнены
                     if (user != 0 && company != null)
                     {
-                        // Проверяем есть ли у пользователя какие-либо роли
-                        var existingStaff = staff.FirstOrDefault(x => x.user_id == user);
-                        if (existingStaff == null)
+                        var dataSupplier = new Models.Supplier()
                         {
-                            selectedItem.user_id = user;
-                            selectedItem.Company_name = company;
-                        }
-                        else
+                            user_id = user,
+                            Company_name = company
+                        };
+                        var updateSupplier = await Data.Common.SuppliersCommon.Update(selectedItem.user_id ,dataSupplier);
+                        if (updateSupplier != null)
                         {
-                            MessageBox.Show("У пользователя уже есть роль", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return;
+                            await LoadRecords();
                         }
+                        else MessageBox.Show("Ошибка при изменении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     else { MessageBox.Show("Проверьте заполненность всех полей", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
                 }
-                else { MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
-                dataBase.SaveChanges();
+                else MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop);
+                
                 User = 0;
                 Company = null;
                 SelectedItem = null;
                 BthAddContent = "Добавить";
             });
 
-            OnDelete = new RelayCommand(() => {
+            OnDelete = new RelayCommand(async () => {
                 if (Delete && SelectedItem != null)
                 {
-                    dataBase.Suppliers.Remove(SelectedItem);
-                    suppliers.Remove(SelectedItem);
-                    dataBase.SaveChanges();
+                    var deleteStatus = await Data.Common.SuppliersCommon.Delete(SelectedItem.user_id);
+                    if (deleteStatus) Suppliers.Remove(SelectedItem);
+                    else MessageBox.Show("Ошибка при удалении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+
                     User = 0;
                     Company = null;
                     SelectedItem = null;
@@ -135,6 +116,16 @@ namespace PetrolStationNetwork.ViewModels
             Exit = new RelayCommand(() => {
                 MainWindow.init.frame.Navigate(new Views.Pages.Main(UserSession.Full_name));
             });
+        }
+
+        /// <summary>
+        /// Асинхронный метод для загрузки записей
+        /// </summary>
+        /// <returns>Список записей</returns>
+        public async Task LoadRecords()
+        {
+            Users = await Data.Common.UsersCommon.Get();
+            Suppliers = await Data.Common.SuppliersCommon.Get();
         }
 
         // Переменная для проверки на удаление записи

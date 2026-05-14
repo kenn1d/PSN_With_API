@@ -8,14 +8,14 @@ namespace PetrolStationNetwork.Models
     {
         [Key]
         [ForeignKey(nameof(User))]
-        public int user_id;
+        public int user_id { get; set; }
 
         [ObservableProperty]
         private string company_name;
 
         [NotMapped]
-        public string FullName => User.Full_name;
+        public string FullName => User?.Full_name ?? "Нет ФИО";
 
-        public User User { get; set; }
+        public User? User { get; set; }
     }
 }

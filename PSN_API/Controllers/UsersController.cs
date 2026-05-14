@@ -40,7 +40,7 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                List<Models.User> users = dataBase.Users.ToList();
+                var users = dataBase.Users.Select(x => new UserDTO { id = x.id, full_name = x.Full_name, tel_number = x.Tel_number }).ToList();
                 return Ok(users);
             }
             catch (Exception ex)

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace PetrolStationNetwork.Models
 {
@@ -19,7 +20,9 @@ namespace PetrolStationNetwork.Models
         private string password;
 
         // навигации к ролям (один-ко-одному)
+        [JsonIgnore]
         public Supplier Supplier { get; set; }
+        [JsonIgnore]
         public Staff Staff { get; set; }
     }
 }

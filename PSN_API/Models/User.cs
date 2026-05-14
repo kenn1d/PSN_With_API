@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace PSN_API.Models
 {
@@ -19,7 +20,9 @@ namespace PSN_API.Models
         private string password;
 
         // навигации к ролям (один-ко-одному)
-        public Supplier Supplier { get; set; }
-        public Staff Staff { get; set; }
+        [JsonIgnore]
+        public Supplier? Supplier { get; set; }
+        [JsonIgnore]
+        public Staff? Staff { get; set; }
     }
 }
