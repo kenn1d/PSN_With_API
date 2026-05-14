@@ -79,7 +79,7 @@ namespace PetrolStationNetwork.ViewModels
                         if (newItem != null) 
                         {
                             var existingItem = DeliveryItems.FirstOrDefault(x => x.id == newItem.id);
-                            if (existingItem != null) { LoadDeliveryItems(); return; }
+                            if (existingItem != null) { await LoadDeliveryItems(); return; }
                             ;
                             DeliveryItems.Add(newItem);
                         }
@@ -121,7 +121,7 @@ namespace PetrolStationNetwork.ViewModels
                             var updatedItem = await Data.Common.DeliveryItemsCommon.Update(dataItem);
                             if (updatedItem != null)
                             {
-                                LoadDeliveryItems();
+                                await LoadDeliveryItems();
                             }
                             else MessageBox.Show("Ошибка при обновлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
@@ -147,7 +147,7 @@ namespace PetrolStationNetwork.ViewModels
                 if (Delete && SelectedItem != null)
                 {
                     var deleteStatus = await Data.Common.DeliveryItemsCommon.Delete(SelectedItem.id);
-                    if (deleteStatus != false) deliveryItems?.Remove(SelectedItem);
+                    if (deleteStatus != false) await LoadDeliveryItems();
                     else MessageBox.Show("Возникла ошибка при удалении", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
 
                     selectedDelivery = 0;

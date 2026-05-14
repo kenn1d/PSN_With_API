@@ -27,9 +27,9 @@ namespace PetrolStationNetwork.Models
         public virtual DeliveryItem DeliveryItem { get; set; }
 
         [NotMapped]
-        public string ProductName => Product.Name;
+        public string ProductName => Product?.Name ?? "Нет названия";
 
         [NotMapped]
-        public string DeliverySerialNumber => DeliveryItem.Delivery.Serial_number;
+        public string DeliverySerialNumber => DeliveryItem?.Delivery.Serial_number ?? "Нет номера";
     }
 }

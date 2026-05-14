@@ -2,7 +2,9 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using PetrolStationNetwork.Data;
+using PetrolStationNetwork.Views.Pages;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Windows;
 using System.Windows.Input;
 
@@ -34,21 +36,19 @@ namespace PetrolStationNetwork.ViewModels
 
         public VMWarehouseItems()
         {
-            dataBase.WarehouseItems.Load();
             bthAddContent = "Изменить";
 
-            this.warehouseItems = new ObservableCollection<Models.WarehouseItem>(dataBase.WarehouseItems
-                .Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).ToList());
+            LoadWarehouseItems();
 
             if (UserSession.Role == "leader") Delete = true;
-            Update = new RelayCommand(() => {
+            Update = new RelayCommand(async () => {
                 // Проверяем, что запись обновляется
                 if (selectedItem != null)
                 {
                     if (position != null)
                     {
                         // Проверяем есть ли уже элемент с такой позицией
-                        var existingItem = warehouseItems.FirstOrDefault(x => x.Position == position);
+                        var existingItem = WarehouseItems.FirstOrDefault(x => x.Position == position);
                         if (existingItem != null)
                         {
                             MessageBox.Show("Данная позиция занята другим товаром", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -56,7 +56,23 @@ namespace PetrolStationNetwork.ViewModels
                         }
                         else
                         {
-                            selectedItem.Position = position;
+                            var dataItem = new Models.WarehouseItem()
+                            {
+                                id = selectedItem.id,
+                                Delivery_items_id = selectedItem.Delivery_items_id,
+                                Product_id = selectedItem.Product_id,
+                                Count = selectedItem.Count,
+                                Exp_date = selectedItem.Exp_date,
+                                Product = selectedItem.Product,
+                                DeliveryItem = selectedItem.DeliveryItem,
+                                Position = position
+                            };
+                            var updatedItem = await Data.Common.WarehouseItemsCommon.Update(dataItem);
+                            if (updatedItem != null)
+                            {
+                                await LoadWarehouseItems();
+                            }
+                            else MessageBox.Show("Ошибка при обновлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                             Position = null;
                             SelectedItem = null;
                         }
@@ -68,15 +84,18 @@ namespace PetrolStationNetwork.ViewModels
                     }
                 }
                 else { MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
-                dataBase.SaveChanges();
             });
 
-            OnDelete = new RelayCommand(() => {
+            OnDelete = new RelayCommand(async () => {
                 if (Delete && SelectedItem != null)
                 {
-                    dataBase.WarehouseItems.Remove(SelectedItem);
-                    warehouseItems.Remove(SelectedItem);
-                    dataBase.SaveChanges();
+                    var deleteStatus = await Data.Common.WarehouseItemsCommon.Delete(SelectedItem.id);
+                    if (deleteStatus == false)
+                    {
+                        MessageBox.Show("Возникла ошибка при удалении", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    await LoadWarehouseItems();
+
                     SelectedItem = null;
                     Position = null;
                 }
@@ -86,6 +105,15 @@ namespace PetrolStationNetwork.ViewModels
             Exit = new RelayCommand(() => {
                 MainWindow.init.frame.Navigate(new Views.Pages.Main(UserSession.Full_name));
             });
+        }
+
+        /// <summary>
+        /// Асинхронный метод для загрузки записей
+        /// </summary>
+        /// <returns>Список записей</returns>
+        public async Task LoadWarehouseItems()
+        {
+            WarehouseItems = await Data.Common.WarehouseItemsCommon.Get();
         }
 
         // Переменная для проверки на удаление записи

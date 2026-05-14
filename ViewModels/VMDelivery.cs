@@ -81,12 +81,12 @@ namespace PetrolStationNetwork.ViewModels
                         if (UserSession.Role == "Supplier")
                         {
                             if (selectedItem.Supplier_id == UserSession.Id)
-                                UpdateRecord();
+                                await UpdateRecord();
                             else { MessageBox.Show("Запись вам не принадлежит", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
                         }
                         else
                         {
-                            UpdateRecord();
+                            await UpdateRecord();
                         }
                     }
                     else { 
@@ -105,7 +105,7 @@ namespace PetrolStationNetwork.ViewModels
                 if (Delete && SelectedItem != null)
                 {
                     var deleteStatus = await Data.Common.DeliveriesCommon.Delete(SelectedItem.id);
-                    if (deleteStatus != false) deliveries.Remove(SelectedItem);
+                    if (deleteStatus != false) await LoadDeliveries();
                     else MessageBox.Show("Возникла ошибка при удалении", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                     SerialNumber = "";
                     SelectedStatus = null;
@@ -161,7 +161,7 @@ namespace PetrolStationNetwork.ViewModels
                 var updateDelivery = await Data.Common.DeliveriesCommon.Update(dataDelivery);
                 if (updateDelivery != null)
                 {
-                    LoadDeliveries();
+                    await LoadDeliveries();
                 }
                 else MessageBox.Show("Ошибка при обновлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                 SerialNumber = "";

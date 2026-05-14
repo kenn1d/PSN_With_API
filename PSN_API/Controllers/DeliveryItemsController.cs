@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Packaging.Signing;
 using PSN_API.Classes;
 using PSN_API.Data;
-using PSN_API.Models;
-using System.Collections.ObjectModel;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace PSN_API.Controllers
 {

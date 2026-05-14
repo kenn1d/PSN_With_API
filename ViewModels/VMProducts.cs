@@ -61,7 +61,7 @@ namespace PetrolStationNetwork.ViewModels
                                 Name = productName
                             };
                             var newProduct = await Data.Common.ProductsCommon.Add(dataProduct);
-                            if (newProduct != null) Products.Add(newProduct);
+                            if (newProduct != null) await LoadProducts();
                             else MessageBox.Show("Ошибка при добавлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
 
                             ProductName = null;
@@ -87,7 +87,7 @@ namespace PetrolStationNetwork.ViewModels
                             Name = ProductName
                         };
                         var updatedProduct = await Data.Common.ProductsCommon.Update(dataProduct);
-                        if (updatedProduct != null) selectedItem.Name = dataProduct.Name;
+                        if (updatedProduct != null) await LoadProducts();
                         else MessageBox.Show("Ошибка при обновлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
 
                         ProductName = null;
@@ -104,7 +104,7 @@ namespace PetrolStationNetwork.ViewModels
                 if (Delete && SelectedItem != null)
                 {
                     var deleteStatus = await Data.Common.ProductsCommon.Delete(SelectedItem.id);
-                    if (deleteStatus != false) products?.Remove(SelectedItem);
+                    if (deleteStatus != false) await LoadProducts();
                     else MessageBox.Show("Возникла ошибка при удалении", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
 
                     ProductName = null;
