@@ -13,7 +13,7 @@ namespace PetrolStationNetwork.Views.Pages
         {
             InitializeComponent();
             DataContext = new VMShopItems();
-            if (UserSession.Role == "worker" || UserSession.Role == "leader") {
+            if (UserSession.Role == "worker" || UserSession.Role == "leader" || UserSession.Role == "admin") {
                 bthDelete.IsEnabled = true;
                 bthAdd.IsEnabled = true;
                 position.IsEnabled = true;

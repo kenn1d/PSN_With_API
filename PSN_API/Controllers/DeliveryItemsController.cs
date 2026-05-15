@@ -62,7 +62,7 @@ namespace PSN_API.Controllers
                 if (UserId == null) return Unauthorized();
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
-                if (UserRole != "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+                if (UserRole != "Supplier" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 // Проверяем есть ли уже элемент такой поставки с таким же продуктом
                 // Если true то суммируем количество - обновляем запись
@@ -112,7 +112,7 @@ namespace PSN_API.Controllers
                 if (UserId == null) return Unauthorized();
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
-                if (UserRole != "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+                if (UserRole != "Supplier" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 Models.DeliveryItem existingDeliveryItem = dataBase.DeliveryItems.FirstOrDefault(x => x.id == deliveryItem.id);
                 if (existingDeliveryItem == null) return NotFound();
@@ -148,7 +148,7 @@ namespace PSN_API.Controllers
                 if (UserId == null) return Unauthorized();
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
-                if (UserRole != "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+                if (UserRole != "Supplier" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 var existingDeliveryItem = dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).FirstOrDefault(x => x.id == id);
                 if (existingDeliveryItem == null) return NotFound();

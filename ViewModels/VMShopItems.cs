@@ -45,7 +45,7 @@ namespace PetrolStationNetwork.ViewModels
 
             LoadRecords();
 
-            if (UserSession.Role == "leader" || UserSession.Role == "worker") Delete = true;
+            if (UserSession.Role == "leader" || UserSession.Role == "worker" || UserSession.Role == "admin") Delete = true;
             Add = new RelayCommand(async () => {
                 // Проверяем, что запись добавлется
                 if (selectedItem == null)

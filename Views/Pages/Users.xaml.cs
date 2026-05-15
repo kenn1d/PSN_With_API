@@ -1,4 +1,5 @@
-﻿using PetrolStationNetwork.ViewModels;
+﻿using PetrolStationNetwork.Data;
+using PetrolStationNetwork.ViewModels;
 using System.Windows.Controls;
 
 namespace PetrolStationNetwork.Views.Pages
@@ -12,6 +13,7 @@ namespace PetrolStationNetwork.Views.Pages
         {
             InitializeComponent();
             DataContext = new VMUsers();
+            if (UserSession.Role == "admin") { fullName.IsEnabled = true; phone.IsEnabled = true; bthAdd.IsEnabled = true; bthDelete.IsEnabled = true; }
         }
     }
 }

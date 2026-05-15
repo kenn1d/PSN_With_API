@@ -1,18 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.EntityFrameworkCore;
 using PetrolStationNetwork.Data;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace PetrolStationNetwork.ViewModels
 {
     public partial class VMStaff : ObservableObject
     {
-        private DataContext dataBase = new DataContext();
-
         // Список сотрудников
         [ObservableProperty]
         private ObservableCollection<Models.User> users;
@@ -47,11 +43,11 @@ namespace PetrolStationNetwork.ViewModels
 
             LoadRecords();
 
-            if (UserSession.Role == "leader") Delete = true;
+            if (UserSession.Role == "leader" || UserSession.Role == "admin") Delete = true;
             Add = new RelayCommand(async () =>
             {
                 // Проверяем, что запись добавлется
-                if (UserSession.Role == "leader" && selectedItem == null)
+                if ((UserSession.Role == "leader" || UserSession.Role == "admin") && selectedItem == null)
                 {
                     if (user != 0 && role != null)
                     {

@@ -11,9 +11,9 @@ namespace PetrolStationNetwork.Data.Common
         public static string url = "https://localhost:7101/api/";
 
         /// <summary>
-        /// Асинхронный метод получения записей продуктов
+        /// Асинхронный метод получения записей
         /// </summary>
-        /// <returns>Список продуктов</returns>
+        /// <returns>Список</returns>
         public static async Task<ObservableCollection<Models.Staff>> Get()
         {
             // Создаём Http клиент
@@ -40,7 +40,7 @@ namespace PetrolStationNetwork.Data.Common
         }
 
         /// <summary>
-        /// Асинхронный метод добавления записи продукта
+        /// Асинхронный метод добавления записи
         /// </summary>
         /// <param name="Staff">Объект для добавления</param>
         /// <returns>Созданный объект или null</returns>
@@ -74,7 +74,7 @@ namespace PetrolStationNetwork.Data.Common
         }
 
         /// <summary>
-        /// Асинхронный метод изменения записи продукта
+        /// Асинхронный метод изменения записи
         /// </summary>
         /// <param name="Staff">Изменяемый объект с новыми данными</param>
         /// <returns>Изменённый объект или null</returns>
@@ -101,9 +101,9 @@ namespace PetrolStationNetwork.Data.Common
         }
 
         /// <summary>
-        /// Асинхронный метод для удаления записи продукта
+        /// Асинхронный метод для удаления записи
         /// </summary>
-        /// <param name="id">id продукта</param>
+        /// <param name="user_id">id пользователя</param>
         /// <returns>Результат True или False</returns>
         public static async Task<bool> Delete(int user_id)
         {

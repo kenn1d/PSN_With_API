@@ -36,11 +36,11 @@ namespace PetrolStationNetwork.ViewModels
 
             LoadDeliveries();
             
-            if (UserSession.Role == "leader") Delete = true;
+            if (UserSession.Role == "leader" || UserSession.Role == "admin") Delete = true;
             Add = new RelayCommand(async () => {
                 // Проверяем, что запись добавлется
                 var existDelivery = deliveries.FirstOrDefault(x => x.Serial_number == serialNumber);
-                if (UserSession.Role == "Supplier" && selectedItem == null)
+                if ((UserSession.Role == "Supplier" || UserSession.Role == "admin") && selectedItem == null)
                 {
                     // Проверяем на дублирование
                     if (existDelivery == null)
@@ -78,7 +78,7 @@ namespace PetrolStationNetwork.ViewModels
                 {
                     if (selectedItem.Status != "Принята")
                     {
-                        if (UserSession.Role == "Supplier")
+                        if (UserSession.Role == "Supplier" || UserSession.Role == "admin")
                         {
                             if (selectedItem.Supplier_id == UserSession.Id)
                                 await UpdateRecord();

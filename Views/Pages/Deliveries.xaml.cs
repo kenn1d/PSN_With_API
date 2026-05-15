@@ -14,6 +14,7 @@ namespace PetrolStationNetwork.Views.Pages
             DataContext = new ViewModels.VMDelivery();
             if (UserSession.Role == "Supplier") { bthAdd.IsEnabled = true; serialNumber.IsEnabled = true; }
             else if (UserSession.Role == "worker") { status.IsEnabled = true; bthAdd.IsEnabled = true; }
+            else if (UserSession.Role == "admin") { bthAdd.IsEnabled = true; serialNumber.IsEnabled = true; status.IsEnabled = true; bthDelete.IsEnabled = true; }
             else { status.IsEnabled = true; bthDelete.IsEnabled = true; bthAdd.IsEnabled = true; }
         }
     }

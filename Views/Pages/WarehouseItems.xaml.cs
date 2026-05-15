@@ -15,7 +15,7 @@ namespace PetrolStationNetwork.Views.Pages
             DataContext = new VMWarehouseItems();
             bthUpdate.IsEnabled = true;
             position.IsEnabled = true;
-            if (UserSession.Role == "leader")
+            if (UserSession.Role == "leader" || UserSession.Role == "admin")
             {
                 bthDelete.IsEnabled = true;
             }

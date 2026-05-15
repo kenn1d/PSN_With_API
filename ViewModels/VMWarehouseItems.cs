@@ -1,10 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.EntityFrameworkCore;
 using PetrolStationNetwork.Data;
-using PetrolStationNetwork.Views.Pages;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using System.Windows;
 using System.Windows.Input;
 
@@ -12,8 +9,6 @@ namespace PetrolStationNetwork.ViewModels
 {
     public partial class VMWarehouseItems : ObservableObject
     {
-        private DataContext dataBase = new DataContext();
-
         // Список поставок
         [ObservableProperty]
         private ObservableCollection<Models.WarehouseItem> warehouseItems;
@@ -40,7 +35,7 @@ namespace PetrolStationNetwork.ViewModels
 
             LoadWarehouseItems();
 
-            if (UserSession.Role == "leader") Delete = true;
+            if (UserSession.Role == "leader" || UserSession.Role == "admin") Delete = true;
             Update = new RelayCommand(async () => {
                 // Проверяем, что запись обновляется
                 if (selectedItem != null)

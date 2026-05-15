@@ -56,11 +56,11 @@ namespace PetrolStationNetwork.ViewModels
             LoadDeliveryItems();
             ExpDate = DateTime.Now;
 
-            if (UserSession.Role == "Supplier") Delete = true;
+            if (UserSession.Role == "Supplier" || UserSession.Role == "admin") Delete = true;
             Add = new RelayCommand(async () =>
             {
                 // Проверяем, что запись добавлется
-                if (UserSession.Role == "Supplier" && selectedItem == null)
+                if ((UserSession.Role == "Supplier" || UserSession.Role == "admin") && selectedItem == null)
                 {
                     if (selectedDelivery != 0 && selectedProduct != 0 && productsCount > 0 && expDate > DateTime.Now)
                     {

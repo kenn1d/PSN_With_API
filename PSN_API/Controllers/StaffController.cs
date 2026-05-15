@@ -39,7 +39,7 @@ namespace PSN_API.Controllers
                 if (UserId == null) return Unauthorized(); // StatusCode 401
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
-                if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+                if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 // Конвертируем модель в DTO модель
                 var staff = dataBase.Staff.Include(x => x.User)
@@ -87,7 +87,7 @@ namespace PSN_API.Controllers
                 if (UserId == null) return Unauthorized();
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
-                if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+                if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 var existingStaff = dataBase.Staff.Include(x => x.User).FirstOrDefault(x => x.user_id == staff.user_id);
                 var existingSupplier = dataBase.Suppliers.Include(x => x.User).FirstOrDefault(x => x.user_id == staff.user_id);
@@ -129,7 +129,7 @@ namespace PSN_API.Controllers
                 if (UserId == null) return Unauthorized();
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
-                if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+                if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 var updatingStaff = dataBase.Staff.Include(x => x.User).FirstOrDefault(x => x.user_id == updateUserId);
                 if (updatingStaff == null) return BadRequest("Ошибка: Редактируемый поставщик не найден");
@@ -178,7 +178,7 @@ namespace PSN_API.Controllers
                 if (UserId == null) return Unauthorized();
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
-                if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+                if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 var existStaff = dataBase.Staff.Include(x => x.User).FirstOrDefault(x => x.user_id == user_id);
                 if (existStaff == null) return NotFound();

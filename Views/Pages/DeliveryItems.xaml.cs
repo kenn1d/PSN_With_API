@@ -13,7 +13,7 @@ namespace PetrolStationNetwork.Views.Pages
         {
             InitializeComponent();
             DataContext = new VMDeliveryItems();
-            if (UserSession.Role == "Supplier") { bthAdd.IsEnabled = true; bthDelete.IsEnabled = true; deliveryPicker.IsEnabled = true; productPicker.IsEnabled = true; count.IsEnabled = true; expDate.IsEnabled = true; }
+            if (UserSession.Role == "Supplier" || UserSession.Role == "admin") { bthAdd.IsEnabled = true; bthDelete.IsEnabled = true; deliveryPicker.IsEnabled = true; productPicker.IsEnabled = true; count.IsEnabled = true; expDate.IsEnabled = true; }
         }
 
         private void NumberValidationTextBox(object sender, System.Windows.Input.TextCompositionEventArgs e)

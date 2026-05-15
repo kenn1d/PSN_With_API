@@ -115,7 +115,7 @@ namespace PSN_API.Controllers
                     }
                     
                     dataBase.SaveChanges();
-                    var Result = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.id == shopItem.id);
+                    var Result = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.Warehouse_item_id == shopItem.Warehouse_item_id);
                     return Ok(Result);
                 }
             }

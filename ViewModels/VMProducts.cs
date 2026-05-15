@@ -35,11 +35,11 @@ namespace PetrolStationNetwork.ViewModels
 
             LoadProducts(); // Загружаем товары
 
-            if (UserSession.Role == "leader") Delete = true;
+            if (UserSession.Role == "leader" || UserSession.Role == "admin") Delete = true;
             Add = new RelayCommand(async () =>
             {
                 // Проверяем, что запись добавлется
-                if (UserSession.Role == "leader" && selectedItem == null)
+                if ((UserSession.Role == "leader" || UserSession.Role == "admin") && selectedItem == null)
                 {
                     if (productName != null)
                     {
