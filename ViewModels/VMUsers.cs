@@ -21,6 +21,14 @@ namespace PetrolStationNetwork.ViewModels
         [ObservableProperty]
         private string phone;
 
+        // login
+        [ObservableProperty]
+        private string login;
+
+        // password
+        [ObservableProperty]
+        private string password;
+
         // Выбранный элемент списка
         [ObservableProperty]
         private Models.User selectedItem;
@@ -35,6 +43,7 @@ namespace PetrolStationNetwork.ViewModels
 
         public VMUsers() 
         {
+            BthAddContent = "Добавить";
             LoadRecords();
 
             if (UserSession.Role == "admin") Delete = true;
@@ -43,15 +52,17 @@ namespace PetrolStationNetwork.ViewModels
                 // Проверяем, что запись добавлется
                 if (UserSession.Role == "admin" && selectedItem == null)
                 {
-                    if (fullName != 0 && phone != null)
+                    if (fullName != null && phone != null && login != null && password != null)
                     {
                         var dataUser = new Models.User()
                         {
                             Full_name = FullName,
-                            Tel_number = company
+                            Tel_number = Phone,
+                            Login = Login,
+                            Password = Password
                         };
-                        var addSupplier = await Data.Common.SuppliersCommon.Add(dataSupplier);
-                        if (addSupplier != null)
+                        var addUser = await Data.Common.UsersCommon.Add(dataUser);
+                        if (addUser != null)
                         {
                             await LoadRecords();
                         }
@@ -67,26 +78,30 @@ namespace PetrolStationNetwork.ViewModels
                 else if (selectedItem != null)
                 {
                     // Проверяем что все поля заполнены
-                    if (user != 0 && company != null)
+                    if (fullName != null && phone != null && login != null && password != null)
                     {
-                        var dataSupplier = new Models.Supplier()
+                        var dataUser = new Models.User()
                         {
-                            user_id = user,
-                            Company_name = company
+                            Full_name = FullName,
+                            Tel_number = Phone,
+                            Login = Login,
+                            Password = Password
                         };
-                        var updateSupplier = await Data.Common.SuppliersCommon.Update(selectedItem.user_id, dataSupplier);
-                        if (updateSupplier != null)
+                        var updateUser = await Data.Common.UsersCommon.Update(selectedItem.id, dataUser);
+                        if (updateUser != null)
                         {
                             await LoadRecords();
                         }
                         else MessageBox.Show("Ошибка при изменении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                    else { MessageBox.Show("Проверьте заполненность всех полей", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); return; }
+                    else { MessageBox.Show("Проверьте заполненность всех полей", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop); }
                 }
                 else MessageBox.Show("Запись не выбрана или нет доступа", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Stop);
 
-                User = 0;
-                Company = null;
+                FullName = null;
+                Phone = null;
+                Login = null;
+                Password = null;
                 SelectedItem = null;
                 BthAddContent = "Добавить";
             });
@@ -94,12 +109,14 @@ namespace PetrolStationNetwork.ViewModels
             OnDelete = new RelayCommand(async () => {
                 if (Delete && SelectedItem != null)
                 {
-                    var deleteStatus = await Data.Common.UsersCommon.Delete(SelectedItem.user_id);
+                    var deleteStatus = await Data.Common.UsersCommon.Delete(SelectedItem.id);
                     if (deleteStatus) await LoadRecords();
                     else MessageBox.Show("Ошибка при удалении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
 
                     FullName = null;
                     Phone = null;
+                    Login = null;
+                    Password = null;
                     SelectedItem = null;
                     BthAddContent = "Добавить";
                 }
@@ -135,6 +152,8 @@ namespace PetrolStationNetwork.ViewModels
 
                 this.FullName = item.Full_name;
                 this.Phone = item.Tel_number;
+                this.Login = item.Login;
+                this.Password = item.Password;
                 BthAddContent = "Изменить";
             }
         }

@@ -40,7 +40,7 @@ namespace PetrolStationNetwork.Data.Common
         }
 
         /// <summary>
-        /// Асинхронный метод добавления записи продукта
+        /// Асинхронный метод добавления записи
         /// </summary>
         /// <param name="User">Объект для добавления</param>
         /// <returns>Созданный объект или null</returns>
@@ -74,17 +74,18 @@ namespace PetrolStationNetwork.Data.Common
         }
 
         /// <summary>
-        /// Асинхронный метод изменения записи продукта
+        /// Асинхронный метод изменения записи
         /// </summary>
         /// <param name="User">Изменяемый объект с новыми данными</param>
         /// <returns>Изменённый объект или null</returns>
-        public static async Task<Models.User> Update(Models.User User)
+        public static async Task<Models.User> Update(int updateUserId, Models.User User)
         {
             using (HttpClient Client = new HttpClient())
             {
                 using (HttpRequestMessage Request = new HttpRequestMessage(HttpMethod.Put, url + "Users/update"))
                 {
                     Request.Headers.Add("token", UserSession.Token);
+                    Request.Headers.Add("updateUserId", updateUserId.ToString());
                     string JsonData = JsonConvert.SerializeObject(User);
                     Request.Content = new StringContent(JsonData, System.Text.Encoding.UTF8, "application/json");
                     var Response = await Client.SendAsync(Request);

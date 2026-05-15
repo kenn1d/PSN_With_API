@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSN_API.Classes;
 using PSN_API.Data;
+using System.Data;
 
 namespace PSN_API.Controllers
 {
@@ -39,10 +40,15 @@ namespace PSN_API.Controllers
                 if (UserId == null) return Unauthorized(); // StatusCode 401
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
-                if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+                if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var users = dataBase.Users.Select(x => new UserDTO { id = x.id, full_name = x.Full_name, tel_number = x.Tel_number }).ToList();
-                return Ok(users);
+                if (UserRole == "admin")
+                {
+                    var users = dataBase.Users.ToList();
+                    return Ok(users);
+                }
+                var dtoUsers = dataBase.Users.Select(x => new UserDTO { id = x.id, full_name = x.Full_name, tel_number = x.Tel_number }).ToList();
+                return Ok(dtoUsers);
             }
             catch (Exception ex)
             {
@@ -68,9 +74,8 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingStaff = dataBase.Staff.Include(x => x.User).FirstOrDefault(x => x.user_id == User.user_id);
-                var existingUser = dataBase.Users.Include(x => x.User).FirstOrDefault(x => x.user_id == User.user_id);
-                if (existingStaff == null && existingUser == null)
+                var existingUser = dataBase.Users.FirstOrDefault(x => x.Login == User.Login);
+                if (existingUser == null)
                 {
                     Models.User newUser = new Models.User()
                     {
@@ -81,7 +86,7 @@ namespace PSN_API.Controllers
                     };
                     dataBase.Users.Add(newUser);
                 }
-                else return BadRequest("Ошибка: У пользователя уже есть роль");
+                else return BadRequest("Ошибка: Пользователь с таким логином уже существует");
 
                 dataBase.SaveChanges();
 
@@ -97,13 +102,13 @@ namespace PSN_API.Controllers
         /// Обновление записи
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
-        /// <param name="updateUserId">id обновляемой записи</param>
         /// <param name="User">Обновлённые данные записи</param>
+        /// <param name="updateUserId">id Редатируемой записи</param>
         /// <returns>Обновлённая запись</returns>
         [Route("update")]
         [HttpPut]
-        public ActionResult Update([FromHeader] string token, [FromBody] Models.User User)
-        {
+        public ActionResult Update([FromHeader] string token, [FromHeader] int updateUserId, [FromBody] Models.User User)
+       {
             try
             {
                 int? UserId = JwtToken.GetUserIdFromToken(token);
@@ -112,30 +117,22 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var updatingUser = dataBase.Users.Include(x => x.User).FirstOrDefault(x => x.user_id == updateUserId);
-                if (updatingUser == null) return BadRequest("Ошибка: Редактируемый поставщик не найден");
+                var updatingUser = dataBase.Users.FirstOrDefault(x => x.id == updateUserId);
+                if (updatingUser == null) return BadRequest("Ошибка: Редактируемый пользователь не найден");
 
-                if (updateUserId != User.user_id)
+                if (updatingUser.Login != User.Login)
                 {
-                    // Проверяем, существует ли новый пользователь
-                    if (!dataBase.Users.Any(u => u.id == User.user_id))
-                        return BadRequest("Ошибка: Новый пользователь не существует");
-
-                    // Проверяем, не занят ли он уже другой ролью
-                    if (dataBase.Users.Any(s => s.user_id == User.user_id) ||
-                        dataBase.Staff.Any(st => st.user_id == User.user_id))
-                        return BadRequest("Ошибка: У нового пользователя уже есть роль");
-
-                    dataBase.Users.Remove(updatingUser);
-                    dataBase.Users.Add(User);
+                    // Проверяем, существует ли пользователь с новым логином
+                    if (dataBase.Users.Any(u => u.Login == User.Login))
+                        return BadRequest("Ошибка: Пользователь с таким логином уже существует");
                 }
-                else
-                {
-                    updatingUser.Company_name = User.Company_name;
-                }
+                updatingUser.Full_name = User.Full_name;
+                updatingUser.Tel_number = User.Tel_number;
+                updatingUser.Login = User.Login;
+                updatingUser.Password = User.Password;
 
                 dataBase.SaveChanges();
-                return Ok(User);
+                return Ok(updatingUser);
             }
             catch (Exception ex)
             {
@@ -161,14 +158,14 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existUser = dataBase.Users.Include(x => x.User).FirstOrDefault(x => x.user_id == user_id);
+                var existUser = dataBase.Users.FirstOrDefault(x => x.id == user_id);
 
                 if (existUser == null) return NotFound();
 
                 dataBase.Users.Remove(existUser);
                 dataBase.SaveChanges();
 
-                return Ok();
+                return Ok(existUser);
             }
             catch (Exception ex)
             {

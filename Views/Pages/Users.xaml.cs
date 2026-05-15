@@ -13,7 +13,7 @@ namespace PetrolStationNetwork.Views.Pages
         {
             InitializeComponent();
             DataContext = new VMUsers();
-            if (UserSession.Role == "admin") { fullName.IsEnabled = true; phone.IsEnabled = true; bthAdd.IsEnabled = true; bthDelete.IsEnabled = true; }
+            if (UserSession.Role == "admin") { fullName.IsEnabled = true; phone.IsEnabled = true; login.IsEnabled = true; password.IsEnabled = true; bthAdd.IsEnabled = true; bthDelete.IsEnabled = true; }
         }
     }
 }
