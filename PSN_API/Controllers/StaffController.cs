@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSN_API.Classes;
 using PSN_API.Data;
-using PSN_API.Models;
 
 namespace PSN_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SuppliersController : ControllerBase
+    public class StaffController : ControllerBase
     {
         /// <summary>
         /// Приватное поле для хранения экземпляра DataContext
@@ -20,7 +19,7 @@ namespace PSN_API.Controllers
         /// <summary>
         /// Конструктор контроллера
         /// </summary>
-        public SuppliersController(DataContext dataBase)
+        public StaffController(DataContext dataBase)
         {
             this.dataBase = dataBase;
         }
@@ -43,20 +42,19 @@ namespace PSN_API.Controllers
                 if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 // Конвертируем модель в DTO модель
-                var suppliers = dataBase.Suppliers.Include(x => x.User)
-                    .Select(x => new SupplierDTO
-                    {
-                        id = x.user_id,
-                        CompanyName = x.Company_name,
+                var staff = dataBase.Staff.Include(x => x.User)
+                    .Select(x => new StaffDTO { 
+                        id = x.user_id, 
+                        role = x.Role,
                         FullName = x.FullName
                     })
                     // Запоминаем полученные данные с сервера
                     .AsEnumerable()
                     // Конвертируем DTO обратно в обычную модель для отправки клиенту
-                    .Select(x => new Models.Supplier
+                    .Select(x => new Models.Staff
                     {
                         user_id = x.id,
-                        Company_name = x.CompanyName,
+                        Role = x.role,
                         User = new Models.User
                         {
                             id = x.id,
@@ -65,7 +63,7 @@ namespace PSN_API.Controllers
                     })
                     .ToList();
 
-                return Ok(suppliers);
+                return Ok(staff);
             }
             catch (Exception ex)
             {
@@ -77,11 +75,11 @@ namespace PSN_API.Controllers
         /// Добавление записи нового
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
-        /// <param name="supplier">Новый объект</param>
+        /// <param name="staff">Новый объект</param>
         /// <returns>Новый объект или ошибка</returns>
         [Route("add")]
         [HttpPost]
-        public ActionResult Add([FromHeader] string token, [FromBody] Models.Supplier supplier)
+        public ActionResult Add([FromHeader] string token, [FromBody] Models.Staff staff)
         {
             try
             {
@@ -91,22 +89,22 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingStaff = dataBase.Staff.Include(x => x.User).FirstOrDefault(x => x.user_id == supplier.user_id);
-                var existingSupplier = dataBase.Suppliers.Include(x => x.User).FirstOrDefault(x => x.user_id == supplier.user_id);
+                var existingStaff = dataBase.Staff.Include(x => x.User).FirstOrDefault(x => x.user_id == staff.user_id);
+                var existingSupplier = dataBase.Suppliers.Include(x => x.User).FirstOrDefault(x => x.user_id == staff.user_id);
                 if (existingStaff == null && existingSupplier == null)
                 {
-                    Supplier newSupplier = new Supplier()
+                    Models.Staff newStaff = new Models.Staff()
                     {
-                        user_id = supplier.user_id,
-                        Company_name = supplier.Company_name
+                        user_id = staff.user_id,
+                        Role = staff.Role
                     };
-                    dataBase.Suppliers.Add(newSupplier);
+                    dataBase.Staff.Add(newStaff);
                 }
                 else return BadRequest("Ошибка: У пользователя уже есть роль");
 
                 dataBase.SaveChanges();
 
-                return Ok(supplier);
+                return Ok(staff);
             }
             catch (Exception ex)
             {
@@ -119,11 +117,11 @@ namespace PSN_API.Controllers
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="updateUserId">id обновляемой записи</param>
-        /// <param name="supplier">Обновлённые данные записи</param>
+        /// <param name="staff">Обновлённые данные записи</param>
         /// <returns>Обновлённая запись</returns>
         [Route("update")]
         [HttpPut]
-        public ActionResult Update([FromHeader] string token, [FromHeader] int updateUserId, [FromBody] Models.Supplier supplier)
+        public ActionResult Update([FromHeader] string token, [FromHeader] int updateUserId, [FromBody] Models.Staff staff)
         {
             try
             {
@@ -133,30 +131,30 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var updatingSupplier = dataBase.Suppliers.Include(x => x.User).FirstOrDefault(x => x.user_id == updateUserId);
-                if (updatingSupplier == null) return BadRequest("Ошибка: Редактируемый поставщик не найден");
+                var updatingStaff = dataBase.Staff.Include(x => x.User).FirstOrDefault(x => x.user_id == updateUserId);
+                if (updatingStaff == null) return BadRequest("Ошибка: Редактируемый поставщик не найден");
 
-                if (updateUserId != supplier.user_id)
+                if (updateUserId != staff.user_id)
                 {
                     // Проверяем, существует ли новый пользователь
-                    if (!dataBase.Users.Any(u => u.id == supplier.user_id))
+                    if (!dataBase.Users.Any(u => u.id == staff.user_id))
                         return BadRequest("Ошибка: Новый пользователь не существует");
 
                     // Проверяем, не занят ли он уже другой ролью
-                    if (dataBase.Suppliers.Any(s => s.user_id == supplier.user_id) ||
-                        dataBase.Staff.Any(st => st.user_id == supplier.user_id))
+                    if (dataBase.Suppliers.Any(s => s.user_id == staff.user_id) ||
+                        dataBase.Staff.Any(st => st.user_id == staff.user_id))
                         return BadRequest("Ошибка: У нового пользователя уже есть роль");
 
-                    dataBase.Suppliers.Remove(updatingSupplier);
-                    dataBase.Suppliers.Add(supplier);
+                    dataBase.Staff.Remove(updatingStaff);
+                    dataBase.Staff.Add(staff);
                 }
                 else
                 {
-                    updatingSupplier.Company_name = supplier.Company_name;
+                    updatingStaff.Role = staff.Role;
                 }
 
                 dataBase.SaveChanges();
-                return Ok(supplier);
+                return Ok(staff);
             }
             catch (Exception ex)
             {
@@ -182,11 +180,10 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existSupplier = dataBase.Suppliers.Include(x => x.User).FirstOrDefault(x => x.user_id == user_id);
+                var existStaff = dataBase.Staff.Include(x => x.User).FirstOrDefault(x => x.user_id == user_id);
+                if (existStaff == null) return NotFound();
 
-                if (existSupplier == null) return NotFound();
-
-                dataBase.Suppliers.Remove(existSupplier);
+                dataBase.Staff.Remove(existStaff);
                 dataBase.SaveChanges();
 
                 return Ok();

@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.EntityFrameworkCore;
 using PetrolStationNetwork.Data;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -102,7 +101,7 @@ namespace PetrolStationNetwork.ViewModels
                 if (Delete && SelectedItem != null)
                 {
                     var deleteStatus = await Data.Common.SuppliersCommon.Delete(SelectedItem.user_id);
-                    if (deleteStatus) Suppliers.Remove(SelectedItem);
+                    if (deleteStatus) await LoadRecords();
                     else MessageBox.Show("Ошибка при удалении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
 
                     User = 0;

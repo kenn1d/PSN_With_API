@@ -8,14 +8,14 @@ namespace PSN_API.Models
     {
         [Key]
         [ForeignKey(nameof(User))]
-        public int user_id;
+        public int user_id { get; set; }
 
         [ObservableProperty]
         private string role;
 
         [NotMapped]
-        public string FullName => User.Full_name;
+        public string FullName => User?.Full_name ?? "Нет ФИО";
 
-        public User User { get; set; }
+        public User? User { get; set; }
     }
 }

@@ -14,8 +14,8 @@ namespace PetrolStationNetwork.Models
         private string role;
 
         [NotMapped]
-        public string FullName => User.Full_name;
+        public string FullName => User?.Full_name ?? "Нет ФИО";
 
-        public User User { get; set; }
+        public User? User { get; set; }
     }
 }
