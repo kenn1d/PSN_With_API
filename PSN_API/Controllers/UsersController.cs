@@ -26,7 +26,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Получение записей
+        /// Получение записей пользователей
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <returns>Список записей или ошибка</returns>
@@ -57,7 +57,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Добавление записи нового
+        /// Добавление записи нового пользователя
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="User">Новый объект</param>
@@ -99,7 +99,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Обновление записи
+        /// Обновление записи пользователя
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="User">Обновлённые данные записи</param>
@@ -141,7 +141,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Удаление записи
+        /// Удаление записи пользователя
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="user_id">id пользователя</param>

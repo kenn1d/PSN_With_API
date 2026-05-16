@@ -24,7 +24,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Получение записей
+        /// Получение записей продуктов на складе
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <returns>Список записей или ошибка</returns>
@@ -50,7 +50,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Обновление записи
+        /// Обновление записи продукта на складе
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="warehouseItem">Обновлённые данные записи</param>
@@ -83,7 +83,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Удаление записи
+        /// Удаление записи продукта на складе
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="id">id записи</param>

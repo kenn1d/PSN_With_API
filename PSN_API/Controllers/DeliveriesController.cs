@@ -49,7 +49,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Добавление записи
+        /// Добавление записи поставки
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="delivery">Новый объект</param>

@@ -26,7 +26,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Получение записей
+        /// Получение записей поставщиков
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <returns>Список или ошибка</returns>
@@ -74,7 +74,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Добавление записи нового
+        /// Добавление записи нового поставщика
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="supplier">Новый объект</param>
@@ -115,7 +115,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Обновление записи
+        /// Обновление записи поставщика
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="updateUserId">id обновляемой записи</param>
@@ -165,7 +165,7 @@ namespace PSN_API.Controllers
         }
 
         /// <summary>
-        /// Удаление записи
+        /// Удаление записи поставщика
         /// </summary>
         /// <param name="token">JWT токен запроса</param>
         /// <param name="user_id">id пользователя</param>
