@@ -137,22 +137,20 @@ namespace PetrolStationNetwork.ViewModels
 
                                 var sheet = workbook.Worksheets.Add("Склад");
                                 sheet.Cell(1, 1).Value = "Id";
-                                sheet.Cell(1, 2).Value = "DeliveryItemsId";
-                                sheet.Cell(1, 3).Value = "Продукт";
-                                sheet.Cell(1, 4).Value = "Количество";
-                                sheet.Cell(1, 5).Value = "Срок годности";
-                                sheet.Cell(1, 6).Value = "Позиция";
+                                sheet.Cell(1, 2).Value = "Продукт";
+                                sheet.Cell(1, 3).Value = "Количество";
+                                sheet.Cell(1, 4).Value = "Срок годности";
+                                sheet.Cell(1, 5).Value = "Позиция";
 
                                 var warehouseItems = await Data.Common.WarehouseItemsCommon.Get();
                                 int row = 2;
                                 foreach (var item in warehouseItems)
                                 {
                                     sheet.Cell(row, 1).Value = item.id;
-                                    sheet.Cell(row, 2).Value = item.Delivery_items_id;
-                                    sheet.Cell(row, 3).Value = products.FirstOrDefault(p => p.id == item.Product_id)?.Name ?? "Отсутствует";
-                                    sheet.Cell(row, 4).Value = item.Count;
-                                    sheet.Cell(row, 5).Value = item.Exp_date.ToString("dd.MM.yyyy");
-                                    sheet.Cell(row, 6).Value = item.Position;
+                                    sheet.Cell(row, 2).Value = products.FirstOrDefault(p => p.id == item.Product_id)?.Name ?? "Отсутствует";
+                                    sheet.Cell(row, 3).Value = item.Count;
+                                    sheet.Cell(row, 4).Value = item.Exp_date.ToString("dd.MM.yyyy");
+                                    sheet.Cell(row, 5).Value = item.Position;
 
                                     row++;
                                 }
