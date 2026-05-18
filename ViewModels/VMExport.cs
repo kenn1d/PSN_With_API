@@ -154,7 +154,7 @@ namespace PetrolStationNetwork.ViewModels
 
                                     row++;
                                 }
-                                Styles(sheet, 6, row - 1);
+                                Styles(sheet, 5, row - 1);
                             }
 
                             if (ShopItems)
