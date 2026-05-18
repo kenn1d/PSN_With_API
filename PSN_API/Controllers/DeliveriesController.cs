@@ -39,7 +39,7 @@ namespace PSN_API.Controllers
                 int? UserId = JwtToken.GetUserIdFromToken(token);
                 if (UserId == null) return Unauthorized(); // StatusCode 401
 
-                List<Models.Delivery> deliveries = dataBase.Deliveries.ToList();
+                List<Models.Delivery> deliveries = dataBase.Deliveries.Include(x => x.User).ToList();
                 return Ok(deliveries);
             }
             catch (Exception ex)
@@ -66,7 +66,7 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "Supplier" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingDelivery = dataBase.Deliveries.FirstOrDefault(x => x.Serial_number == delivery.Serial_number);
+                var existingDelivery = dataBase.Deliveries.Include(x => x.User).FirstOrDefault(x => x.Serial_number == delivery.Serial_number);
                 if (existingDelivery != null) return StatusCode(409);
 
                 Models.Delivery newDelivery;
@@ -106,7 +106,7 @@ namespace PSN_API.Controllers
                 int? UserId = JwtToken.GetUserIdFromToken(token);
                 if (UserId == null) return Unauthorized();
 
-                Models.Delivery existingDelivery = dataBase.Deliveries.FirstOrDefault(x => x.id == delivery.id);
+                Models.Delivery existingDelivery = dataBase.Deliveries.Include(x => x.User).FirstOrDefault(x => x.id == delivery.id);
                 if (existingDelivery == null) return NotFound();
 
                 // Если статус "Принята", то копируем поставку в таблицу склада, иначе просто обновляем статус и серийный номер

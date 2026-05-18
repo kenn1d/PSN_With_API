@@ -263,10 +263,10 @@ namespace PetrolStationNetwork.ViewModels
             header.Style.Font.Bold = true;
             header.Style.Font.FontSize = 11;
             header.Style.Font.FontColor = XLColor.White;
-            header.Style.Fill.BackgroundColor = XLColor.FromHtml("#2196F3"); // Фирменный синий
+            header.Style.Fill.BackgroundColor = XLColor.FromHtml("#2196F3"); // Акцентный синий
             header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            sheet.Row(1).Height = 25; // Увеличиваем высоту шапки
+            sheet.Row(1).Height = 25; // Увеличиваем высоту заголовков
 
             // Стилизация строк
             if (lastRow >= 2)

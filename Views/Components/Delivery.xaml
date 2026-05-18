@@ -25,7 +25,7 @@
            VerticalAlignment="Top"
            HorizontalAlignment="Left"
            Padding="0,2,0,0"/>
-            <Label Content="{Binding Supplier_id}" Height="20"
+            <Label Content="{Binding FullName}" Height="20"
            FontSize="14"
            VerticalAlignment="Top"
            HorizontalAlignment="Left"

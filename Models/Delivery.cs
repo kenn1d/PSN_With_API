@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PetrolStationNetwork.Models
 {
@@ -17,5 +18,10 @@ namespace PetrolStationNetwork.Models
 
         [ObservableProperty]
         private string status;
+
+        public virtual User? User { get; set; }
+
+        [NotMapped]
+        public string FullName => User?.Full_name ?? "Нет ФИО";
     }
 }

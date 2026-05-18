@@ -45,7 +45,7 @@ namespace PSN_API.Controllers
                 string role = "";
                 string company = null;
 
-                if (login == "admin" && password == "admin")
+                if (login == "admin")
                 {
                     role = "admin";
                 }

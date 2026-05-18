@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PSN_API.Models
 {
@@ -17,5 +18,10 @@ namespace PSN_API.Models
 
         [ObservableProperty]
         private string status;
+
+        public virtual User? User { get; set; }
+
+        [NotMapped]
+        public string FullName => User?.Full_name ?? "Нет ФИО";
     }
 }

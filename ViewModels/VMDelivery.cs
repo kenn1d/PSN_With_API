@@ -58,7 +58,7 @@ namespace PetrolStationNetwork.ViewModels
                             var newDelivery = await Data.Common.DeliveriesCommon.Add(dataDelivery);
                             if (newDelivery != null)
                             {
-                                deliveries.Add(newDelivery);
+                                LoadDeliveries();
                             }
                             else
                             {
@@ -78,7 +78,7 @@ namespace PetrolStationNetwork.ViewModels
                 {
                     if (selectedItem.Status != "Принята")
                     {
-                        if (UserSession.Role == "Supplier" || UserSession.Role == "admin")
+                        if (UserSession.Role == "Supplier")
                         {
                             if (selectedItem.Supplier_id == UserSession.Id)
                                 await UpdateRecord();

@@ -84,6 +84,12 @@ namespace PSN_API.Data
                 .WithMany()
                 .HasForeignKey(si => si.Warehouse_item_id);
 
+            // Настройка связи User и Delivery для получения позиции поставки на основе id
+            modelBuilder.Entity<Delivery>()
+                .HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.Supplier_id);
+
             base.OnModelCreating(modelBuilder);
         }
     }
