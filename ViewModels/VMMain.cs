@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PetrolStationNetwork.Data;
+using PetrolStationNetwork.Views.Dialogs;
+using System.Windows;
 using System.Windows.Input;
 
 namespace PetrolStationNetwork.ViewModels
@@ -22,6 +24,7 @@ namespace PetrolStationNetwork.ViewModels
         public ICommand Staff { get; }
 
         public ICommand Exit { get; }
+        public ICommand Export { get; }
 
         public VMMain(string userFIO)
         {
@@ -61,6 +64,11 @@ namespace PetrolStationNetwork.ViewModels
 
             Exit = new RelayCommand(() => {
                 UserSession.DeleteSession();
+            });
+
+            Export = new RelayCommand(() => {
+                ExportWindow export = new ExportWindow();
+                export.ShowDialog();
             });
         }
     }

@@ -17,7 +17,11 @@ namespace PSN_API.Data
 
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
-            Database.EnsureCreated();
+            try
+            {
+                Database.EnsureCreated();
+            }
+            catch { }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -1,0 +1,41 @@
+﻿<Window x:Class="PetrolStationNetwork.Views.Dialogs.ExportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PetrolStationNetwork.Views.Dialogs"
+        mc:Ignorable="d"
+        Title="Экспорт данных" Height="350" Width="300"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Grid Margin="20">
+        <StackPanel VerticalAlignment="Top">
+            <TextBlock Text="Выберите списки для экспорта:" FontSize="14" FontWeight="Bold" Margin="0,0,0,15"/>
+
+            <CheckBox x:Name="Deliveries" Content="Все поставки" Margin="0,5" IsChecked="{Binding Deliveries, UpdateSourceTrigger=PropertyChanged}"/>
+            <CheckBox x:Name="DeliveryItems" Content="Элементы поставок" Margin="0,5" IsChecked="{Binding DeliveryItems, UpdateSourceTrigger=PropertyChanged}"/>
+            <CheckBox x:Name="Products" Content="Все продукты" Margin="0,5" IsChecked="{Binding Products, UpdateSourceTrigger=PropertyChanged}"/>
+            <CheckBox x:Name="WarehouseItems" Content="Товары на складе" Margin="0,5" IsChecked="{Binding WarehouseItems, UpdateSourceTrigger=PropertyChanged}"/>
+            <CheckBox x:Name="ShopItems" Content="Товары на витрине" Margin="0,5" IsChecked="{Binding ShopItems, UpdateSourceTrigger=PropertyChanged}"/>
+            <CheckBox x:Name="Users" Content="Все пользователи" Margin="0,5" IsChecked="{Binding Users, UpdateSourceTrigger=PropertyChanged}"/>
+            <CheckBox x:Name="Suppliers" Content="Поставщики" Margin="0,5" IsChecked="{Binding Suppliers, UpdateSourceTrigger=PropertyChanged}"/>
+            <CheckBox x:Name="Staff" Content="Сотрудники" Margin="0,5" IsChecked="{Binding Staff, UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <Button Content="Отмена" Width="80" Height="25" Margin="0,0,10,0" Background="#F44336" Foreground="White" BorderThickness="0" Click="bthCancel" FontWeight="SemiBold">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <Button Content="Экспорт" Width="80" Height="25" Background="#2196F3" Foreground="White" BorderThickness="0" Command="{Binding Export}" FontWeight="SemiBold">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

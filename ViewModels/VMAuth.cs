@@ -33,6 +33,9 @@ namespace PetrolStationNetwork.ViewModels
 
         public VMAuth()
         {
+            Login = "admin";
+            Password = "admin";
+
             LogIn = new RelayCommand<object>(async (param) =>
             {
                 // Получаем пароль из PasswordBox

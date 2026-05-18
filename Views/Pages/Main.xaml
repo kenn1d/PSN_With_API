@@ -164,24 +164,54 @@
             </Button>
         </Grid>
 
-        <Button
-        Command="{Binding Exit}"
-        Content="Выйти"
-        Background="#F44336"
-        Foreground="White"
-        BorderThickness="0"
-        FontSize="14"
-        FontWeight="SemiBold"
-        Padding="0"
-        Width="74"
-        Cursor="Hand"
-        HorizontalContentAlignment="Center"
-        HorizontalAlignment="Center" Margin="0,0,0,5" Height="25" VerticalAlignment="Bottom">
-            <Button.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="4"/>
-                </Style>
-            </Button.Resources>
-        </Button>
+        <Grid Margin="0,420,0,0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Width="190">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button
+            Grid.Column="0"
+            Command="{Binding Exit}"
+            Content="Выйти"
+            Background="#F44336"
+            Foreground="White"
+            BorderThickness="0"
+            FontSize="14"
+            FontWeight="SemiBold"
+            Padding="0"
+            Width="74"
+            Cursor="Hand"
+            HorizontalContentAlignment="Center"
+            HorizontalAlignment="Center" Margin="0,0,0,5" Height="25" VerticalAlignment="Bottom">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <Button IsEnabled="False"
+            x:Name="Export"
+            Grid.Column="1"
+            Command="{Binding Export}"
+            Content="Экспорт"
+            Background="#2196F3"
+            Foreground="White"
+            BorderThickness="0"
+            FontSize="14"
+            FontWeight="SemiBold"
+            Padding="0"
+            Width="74"
+            Cursor="Hand"
+            HorizontalContentAlignment="Center"
+            HorizontalAlignment="Center" Margin="0,0,0,5" Height="25" VerticalAlignment="Bottom">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </Grid>
     </Grid>
 </Page>

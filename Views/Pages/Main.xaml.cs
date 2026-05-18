@@ -36,6 +36,9 @@ namespace PetrolStationNetwork.Views.Pages
                 Suppliers.IsEnabled = true;
                 Staff.IsEnabled = true;
             }
+
+            if (UserSession.Role == "admin") Export.IsEnabled = true;
+
             DataContext = new VMMain(userFIO);
         }
     }
