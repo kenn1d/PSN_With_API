@@ -17,11 +17,17 @@ namespace PSN_API.Controllers
         private DataContext dataBase;
 
         /// <summary>
+        /// Экземпляр Serilog
+        /// </summary>
+        private readonly ILogger<AuthController> log;
+
+        /// <summary>
         /// Конструктор контроллера
         /// </summary>
-        public StaffController(DataContext dataBase)
+        public StaffController(DataContext dataBase, ILogger<AuthController> log)
         {
             this.dataBase = dataBase;
+            this.log = log;
         }
 
         /// <summary>
@@ -67,6 +73,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода GET в Staff");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -108,6 +116,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода ADD в Staff");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -158,6 +168,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода UPDATE в Staff");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -190,6 +202,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода DELETE в Staff");
+
                 return StatusCode(501, ex.Message);
             }
         }

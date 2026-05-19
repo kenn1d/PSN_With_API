@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using PSN_API.Classes;
 using PSN_API.Data;
 using System.Data;
@@ -18,11 +16,17 @@ namespace PSN_API.Controllers
         private DataContext dataBase;
 
         /// <summary>
+        /// Экземпляр Serilog
+        /// </summary>
+        private readonly ILogger<AuthController> log;
+
+        /// <summary>
         /// Конструктор контроллера
         /// </summary>
-        public UsersController(DataContext dataBase)
+        public UsersController(DataContext dataBase, ILogger<AuthController> log)
         {
             this.dataBase = dataBase;
+            this.log = log;
         }
 
         /// <summary>
@@ -52,6 +56,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода GET в Users");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -94,6 +100,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода ADD в Users");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -136,6 +144,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода UPDATE в Users");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -169,6 +179,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода DELETE в Users");
+
                 return StatusCode(501, ex.Message);
             }
         }

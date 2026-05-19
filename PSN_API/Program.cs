@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PetrolStationNetwork.Data;
 using PSN_API.Data;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,15 @@ builder.Services.AddSwaggerGen(options =>
 
     if (File.Exists(xmlPath)) options.IncludeXmlComments(xmlPath);
 });
+
+// Ќастриваем Serilog логер на логирование контроллеров
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File($"Data/Logs/log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+// ”казываем что логи должны идти через Serilog
+builder.Host.UseSerilog();
 
 // ƒобавл€ем контекст данных
 builder.Services.AddDbContext<DataContext>(options =>

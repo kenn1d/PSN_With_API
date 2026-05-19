@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PetrolStationNetwork.Data;
 using PSN_API.Models;
+using Serilog;
 
 namespace PSN_API.Data
 {
@@ -24,9 +25,15 @@ namespace PSN_API.Data
             catch { }
         }
 
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseMySql(Config.connection, Config.version);
+
+            // Перенаправление логов базы данных в файл логов Serilog
+            optionsBuilder.LogTo(Log.Information, LogLevel.Information);
+            // Активация отображения значений запросов
+            optionsBuilder.EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

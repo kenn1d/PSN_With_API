@@ -16,11 +16,17 @@ namespace PSN_API.Controllers
         private DataContext dataBase;
 
         /// <summary>
+        /// Экземпляр Serilog
+        /// </summary>
+        private readonly ILogger<AuthController> log;
+
+        /// <summary>
         /// Конструктор контроллера
         /// </summary>
-        public WarehouseItemsController(DataContext dataBase)
+        public WarehouseItemsController(DataContext dataBase, ILogger<AuthController> log)
         {
             this.dataBase = dataBase;
+            this.log = log;
         }
 
         /// <summary>
@@ -45,6 +51,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода GET в WarehouseItems");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -78,6 +86,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода UPDATE в WarehouseItems");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -110,6 +120,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода DELETE в WarehouseItems");
+
                 return StatusCode(501, ex.Message);
             }
         }

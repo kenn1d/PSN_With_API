@@ -18,11 +18,17 @@ namespace PSN_API.Controllers
         private DataContext dataBase;
 
         /// <summary>
+        /// Экземпляр Serilog
+        /// </summary>
+        private readonly ILogger<AuthController> log;
+
+        /// <summary>
         /// Конструктор контроллера
         /// </summary>
-        public DeliveriesController(DataContext dataBase)
+        public DeliveriesController(DataContext dataBase, ILogger<AuthController> logger)
         {
             this.dataBase = dataBase;
+            this.log = logger;
         }
 
         /// <summary>
@@ -44,6 +50,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода GET в Deliveries");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -87,6 +95,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода ADD в Deliveries");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -137,6 +147,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода UPDATE в Deliveries");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -169,6 +181,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода DELETE в Deliveries");
+
                 return StatusCode(501, ex.Message);
             }
         }

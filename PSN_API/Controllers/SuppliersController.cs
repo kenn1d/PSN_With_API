@@ -18,11 +18,17 @@ namespace PSN_API.Controllers
         private DataContext dataBase;
 
         /// <summary>
+        /// Экземпляр Serilog
+        /// </summary>
+        private readonly ILogger<AuthController> log;
+
+        /// <summary>
         /// Конструктор контроллера
         /// </summary>
-        public SuppliersController(DataContext dataBase)
+        public SuppliersController(DataContext dataBase, ILogger<AuthController> log)
         {
             this.dataBase = dataBase;
+            this.log = log;
         }
 
         /// <summary>
@@ -69,6 +75,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода GET в Suppliers");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -110,6 +118,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода ADD в Suppliers");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -160,6 +170,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода UPDATE в Suppliers");
+
                 return StatusCode(501, ex.Message);
             }
         }
@@ -193,6 +205,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода DELETE в Suppliers");
+
                 return StatusCode(501, ex.Message);
             }
         }

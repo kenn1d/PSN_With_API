@@ -19,12 +19,19 @@ namespace PSN_API.Controllers
         private DataContext dataBase;
 
         /// <summary>
+        /// Экземпляр Serilog
+        /// </summary>
+        private readonly ILogger<AuthController> log;
+
+        /// <summary>
         /// Конструктор контроллера
         /// </summary>
         /// <param name="dataBase">База данных</param>
-        public AuthController(DataContext dataBase)
+        /// <param name="logger">Экземпляр Serilog</param>
+        public AuthController(DataContext dataBase, ILogger<AuthController> logger)
         {
             this.dataBase = dataBase;
+            this.log = logger;
         }
 
         /// <summary>
@@ -79,6 +86,8 @@ namespace PSN_API.Controllers
             }
             catch (Exception ex)
             {
+                log.LogError(ex, "Ошибка при выполнении метода LOGIN при авторизации");
+
                 return StatusCode(501, ex.Message);
             }
         }
