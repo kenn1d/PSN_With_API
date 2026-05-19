@@ -61,7 +61,8 @@
             <TextBox x:Name="fullName" BorderBrush="#64B5F6" Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Margin="10,26,10,0" Height="26"/>
 
             <Label Foreground="#1565C0" VerticalAlignment="Top" HorizontalAlignment="Left" Content="Номер телефона:" Margin="10,60,0,0" />
-            <TextBox x:Name="phone" BorderBrush="#64B5F6" VerticalAlignment="Top" Margin="10,86,10,0" Height="26" Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox x:Name="phone" BorderBrush="#64B5F6" VerticalAlignment="Top" Margin="10,86,10,0" Height="26" Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
+                      PreviewTextInput="NumberValidationTextBox"/>
 
             <Label Foreground="#1565C0" VerticalAlignment="Top" HorizontalAlignment="Left" Content="Логин:" Margin="10,120,0,0" />
             <TextBox x:Name="login" BorderBrush="#64B5F6" VerticalAlignment="Top" Margin="10,146,10,0" Height="26" Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"/>

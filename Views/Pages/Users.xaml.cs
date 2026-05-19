@@ -15,5 +15,10 @@ namespace PetrolStationNetwork.Views.Pages
             DataContext = new VMUsers();
             if (UserSession.Role == "admin") { fullName.IsEnabled = true; phone.IsEnabled = true; login.IsEnabled = true; password.IsEnabled = true; bthAdd.IsEnabled = true; bthDelete.IsEnabled = true; }
         }
+
+        private void NumberValidationTextBox(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.Text, e.Text.Length - 1);
+        }
     }
 }
