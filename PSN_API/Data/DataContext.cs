@@ -30,9 +30,7 @@ namespace PSN_API.Data
         {
             optionsBuilder.UseMySql(Config.connection, Config.version);
 
-            // Перенаправление логов базы данных в файл логов Serilog
-            optionsBuilder.LogTo(Log.Information, LogLevel.Information);
-            // Активация отображения значений запросов
+            // Активация отображения значений запросов для логирования БД
             optionsBuilder.EnableSensitiveDataLogging();
         }
 

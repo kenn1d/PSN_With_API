@@ -23,6 +23,12 @@ builder.Services.AddSwaggerGen(options =>
 // Настриваем Serilog логер на логирование контроллеров
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
+        // Отключаем лишний спам
+        .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+        // Отключаем системный спам самой EF
+        .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
+        // Оставляем только вывод исполняемых SQL-команд
+        .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Information)
     .WriteTo.Console()
     .WriteTo.File($"Data/Logs/log.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
