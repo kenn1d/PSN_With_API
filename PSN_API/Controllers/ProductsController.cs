@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NuGet.Protocol.Plugins;
+using Microsoft.EntityFrameworkCore;
 using PSN_API.Classes;
 using PSN_API.Data;
 
@@ -35,7 +35,7 @@ namespace PSN_API.Controllers
         /// <returns>Список продуктов или ошибка</returns>
         [Route("get")]
         [HttpGet]
-        public ActionResult Get([FromHeader] string token)
+        public async Task<ActionResult> Get([FromHeader] string token)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole == "worker") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                List<Models.Product> products = dataBase.Products.ToList();
+                List<Models.Product> products = await dataBase.Products.ToListAsync();
                 return Ok(products);
             }
             catch (Exception ex)
@@ -64,7 +64,7 @@ namespace PSN_API.Controllers
         /// <returns>Новый объект или ошибка</returns>
         [Route("add")]
         [HttpPost]
-        public ActionResult Add([FromHeader] string token, [FromBody] Models.Product product)
+        public async Task<ActionResult> Add([FromHeader] string token, [FromBody] Models.Product product)
         {
             try
             {
@@ -74,15 +74,15 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingProduct = dataBase.Products.FirstOrDefault(x => x.Name == product.Name);
+                var existingProduct = await dataBase.Products.FirstOrDefaultAsync(x => x.Name == product.Name);
                 if (existingProduct != null) return StatusCode(409);
 
                 var newProduct = new Models.Product();
-                dataBase.Products.Add(newProduct = new Models.Product()
+                await dataBase.Products.AddAsync(newProduct = new Models.Product()
                 {
                     Name = product.Name
                 });
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(newProduct);
             }
@@ -102,7 +102,7 @@ namespace PSN_API.Controllers
         /// <returns>Обновлённая запись</returns>
         [Route("update")]
         [HttpPut]
-        public ActionResult Update([FromHeader] string token, [FromBody] Models.Product product)
+        public async Task<ActionResult> Update([FromHeader] string token, [FromBody] Models.Product product)
         {
             try
             {
@@ -112,11 +112,11 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                Models.Product existProduct = dataBase.Products.FirstOrDefault(x => x.id == product.id);
+                Models.Product existProduct = await dataBase.Products.FirstOrDefaultAsync(x => x.id == product.id);
                 if (existProduct == null) return NotFound();
 
                 existProduct.Name = product.Name;
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
                 
                 return Ok(existProduct);
             }
@@ -136,7 +136,7 @@ namespace PSN_API.Controllers
         /// <returns>Статус операции</returns>
         [Route("delete")]
         [HttpDelete]
-        public ActionResult Delete([FromHeader] string token, [FromForm] int id)
+        public async Task<ActionResult> Delete([FromHeader] string token, [FromForm] int id)
         {
             try
             {
@@ -146,11 +146,11 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existProduct = dataBase.Products.FirstOrDefault(x => x.id == id);
+                var existProduct = await dataBase.Products.FirstOrDefaultAsync(x => x.id == id);
                 if (existProduct == null) return NotFound();
 
                 dataBase.Products.Remove(existProduct);
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(existProduct);
             }

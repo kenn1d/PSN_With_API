@@ -36,14 +36,14 @@ namespace PSN_API.Controllers
         /// <returns>Список поставок или ошибка</returns>
         [Route("get")]
         [HttpGet]
-        public ActionResult Get([FromHeader] string token)
+        public async Task<ActionResult> Get([FromHeader] string token)
         {
             try
             {
                 int? UserId = JwtToken.GetUserIdFromToken(token);
                 if (UserId == null) return Unauthorized(); // StatusCode 401
 
-                List<Models.DeliveryItem> deliveryItems = dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).ToList();
+                List<Models.DeliveryItem> deliveryItems = await dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).ToListAsync();
                 return Ok(deliveryItems);
             }
             catch (Exception ex)
@@ -62,7 +62,7 @@ namespace PSN_API.Controllers
         /// <returns>Новый объект или ошибка</returns>
         [Route("add")]
         [HttpPost]
-        public ActionResult Add([FromHeader] string token, [FromBody] Models.DeliveryItem deliveryItem)
+        public async Task<ActionResult> Add([FromHeader] string token, [FromBody] Models.DeliveryItem deliveryItem)
         {
             try
             {
@@ -74,27 +74,27 @@ namespace PSN_API.Controllers
 
                 // Проверяем есть ли уже элемент такой поставки с таким же продуктом
                 // Если true то суммируем количество - обновляем запись
-                var existingDeliveryItem = dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product)
-                    .FirstOrDefault(x => x.Delivery_id == deliveryItem.Delivery_id && x.Product_id == deliveryItem.Product_id);
+                var existingDeliveryItem = await dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product)
+                    .FirstOrDefaultAsync(x => x.Delivery_id == deliveryItem.Delivery_id && x.Product_id == deliveryItem.Product_id);
                 if (existingDeliveryItem != null) 
                 {
                     existingDeliveryItem.Count += deliveryItem.Count;
-                    dataBase.SaveChanges();
-                    var Result = dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).FirstOrDefault(x => x.id == existingDeliveryItem.id);
+                    await dataBase.SaveChangesAsync();
+                    var Result = await dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).FirstOrDefaultAsync(x => x.id == existingDeliveryItem.id);
                     return Ok(Result);
                 }
                 else // Создаём новую запись
                 {
                     Models.DeliveryItem newDeliveryItem;
-                    dataBase.DeliveryItems.Add(newDeliveryItem = new Models.DeliveryItem()
+                    await dataBase.DeliveryItems.AddAsync(newDeliveryItem = new Models.DeliveryItem()
                     {
                         Delivery_id = deliveryItem.Delivery_id,
                         Product_id = deliveryItem.Product_id,
                         Count = deliveryItem.Count,
                         Exp_date = deliveryItem.Exp_date
                     });
-                    dataBase.SaveChanges();
-                    var Result = dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).FirstOrDefault(x => x.id == newDeliveryItem.id);
+                    await dataBase.SaveChangesAsync();
+                    var Result = await dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).FirstOrDefaultAsync(x => x.id == newDeliveryItem.id);
                     return Ok(Result);
                 }
             }
@@ -114,7 +114,7 @@ namespace PSN_API.Controllers
         /// <returns>Обновлённая запись</returns>
         [Route("update")]
         [HttpPut]
-        public ActionResult Update([FromHeader] string token, [FromBody] Models.DeliveryItem deliveryItem)
+        public async Task<ActionResult> Update([FromHeader] string token, [FromBody] Models.DeliveryItem deliveryItem)
         {
             try
             {
@@ -124,16 +124,16 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "Supplier" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                Models.DeliveryItem existingDeliveryItem = dataBase.DeliveryItems.FirstOrDefault(x => x.id == deliveryItem.id);
+                Models.DeliveryItem existingDeliveryItem = await dataBase.DeliveryItems.FirstOrDefaultAsync(x => x.id == deliveryItem.id);
                 if (existingDeliveryItem == null) return NotFound();
 
                 existingDeliveryItem.Delivery_id = deliveryItem.Delivery_id;
                 existingDeliveryItem.Product_id = deliveryItem.Product_id;
                 existingDeliveryItem.Count = deliveryItem.Count;
                 existingDeliveryItem.Exp_date = deliveryItem.Exp_date;
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
-                var Result = dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).FirstOrDefault(x => x.id == existingDeliveryItem.id);
+                var Result = await dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).FirstOrDefaultAsync(x => x.id == existingDeliveryItem.id);
                 return Ok(Result);
             }
             catch (Exception ex)
@@ -152,7 +152,7 @@ namespace PSN_API.Controllers
         /// <returns>Статус операции</returns>
         [Route("delete")]
         [HttpDelete]
-        public ActionResult Delete([FromHeader] string token, [FromForm] int id)
+        public async Task<ActionResult> Delete([FromHeader] string token, [FromForm] int id)
         {
             try
             {
@@ -162,11 +162,11 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "Supplier" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingDeliveryItem = dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).FirstOrDefault(x => x.id == id);
+                var existingDeliveryItem = await dataBase.DeliveryItems.Include(x => x.Delivery).Include(x => x.Product).FirstOrDefaultAsync(x => x.id == id);
                 if (existingDeliveryItem == null) return NotFound();
 
                 dataBase.DeliveryItems.Remove(existingDeliveryItem);
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(existingDeliveryItem);
             }

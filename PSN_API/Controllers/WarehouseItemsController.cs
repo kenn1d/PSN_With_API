@@ -36,7 +36,7 @@ namespace PSN_API.Controllers
         /// <returns>Список записей или ошибка</returns>
         [Route("get")]
         [HttpGet]
-        public ActionResult Get([FromHeader] string token)
+        public async Task<ActionResult> Get([FromHeader] string token)
         {
             try
             {
@@ -46,7 +46,7 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole == "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                List<Models.WarehouseItem> warehouseItems = dataBase.WarehouseItems.Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).ToList();
+                List<Models.WarehouseItem> warehouseItems = await dataBase.WarehouseItems.Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).ToListAsync();
                 return Ok(warehouseItems);
             }
             catch (Exception ex)
@@ -65,7 +65,7 @@ namespace PSN_API.Controllers
         /// <returns>Обновлённая запись</returns>
         [Route("update")]
         [HttpPut]
-        public ActionResult Update([FromHeader] string token, [FromBody] Models.WarehouseItem warehouseItem)
+        public async Task<ActionResult> Update([FromHeader] string token, [FromBody] Models.WarehouseItem warehouseItem)
         {
             try
             {
@@ -75,13 +75,13 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole == "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                Models.WarehouseItem existingWarehouseItem = dataBase.WarehouseItems.FirstOrDefault(x => x.id == warehouseItem.id);
+                Models.WarehouseItem existingWarehouseItem = await dataBase.WarehouseItems.FirstOrDefaultAsync(x => x.id == warehouseItem.id);
                 if (existingWarehouseItem == null) return NotFound();
 
-                existingWarehouseItem.Position = warehouseItem.Position; 
-                dataBase.SaveChanges();
+                existingWarehouseItem.Position = warehouseItem.Position;
+                await dataBase.SaveChangesAsync();
 
-                var Result = dataBase.WarehouseItems.Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).FirstOrDefault(x => x.id == existingWarehouseItem.id);
+                var Result = await dataBase.WarehouseItems.Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).FirstOrDefaultAsync(x => x.id == existingWarehouseItem.id);
                 return Ok(Result);
             }
             catch (Exception ex)
@@ -100,7 +100,7 @@ namespace PSN_API.Controllers
         /// <returns>Статус операции</returns>
         [Route("delete")]
         [HttpDelete]
-        public ActionResult Delete([FromHeader] string token, [FromForm] int id)
+        public async Task<ActionResult> Delete([FromHeader] string token, [FromForm] int id)
         {
             try
             {
@@ -110,11 +110,11 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole == "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingWarehouseItem = dataBase.WarehouseItems.Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).FirstOrDefault(x => x.id == id);
+                var existingWarehouseItem = await dataBase.WarehouseItems.Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).FirstOrDefaultAsync(x => x.id == id);
                 if (existingWarehouseItem == null) return NotFound();
 
                 dataBase.WarehouseItems.Remove(existingWarehouseItem);
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(existingWarehouseItem);
             }

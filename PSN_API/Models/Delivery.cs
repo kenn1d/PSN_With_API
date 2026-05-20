@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PSN_API.Classes;
 
 namespace PSN_API.Models
 {
@@ -19,6 +21,7 @@ namespace PSN_API.Models
         [ObservableProperty]
         private string status;
 
+        [JsonIgnore]
         public virtual User? User { get; set; }
 
         [NotMapped]

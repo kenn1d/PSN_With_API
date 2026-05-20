@@ -38,14 +38,14 @@ namespace PSN_API.Controllers
         /// <returns>Список поставок или ошибка</returns>
         [Route("get")]
         [HttpGet]
-        public ActionResult Get([FromHeader] string token)
+        public async Task<ActionResult> Get([FromHeader] string token)
         {
             try
             {
                 int? UserId = JwtToken.GetUserIdFromToken(token);
                 if (UserId == null) return Unauthorized(); // StatusCode 401
 
-                List<Models.Delivery> deliveries = dataBase.Deliveries.Include(x => x.User).ToList();
+                List<Models.Delivery> deliveries = await dataBase.Deliveries.Include(x => x.User).ToListAsync();
                 return Ok(deliveries);
             }
             catch (Exception ex)
@@ -64,7 +64,7 @@ namespace PSN_API.Controllers
         /// <returns></returns>
         [Route("add")]
         [HttpPost]
-        public ActionResult Add([FromHeader] string token, [FromBody] Models.Delivery delivery)
+        public async Task<ActionResult> Add([FromHeader] string token, [FromBody] Models.Delivery delivery)
         {
             try
             {
@@ -74,18 +74,18 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "Supplier" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingDelivery = dataBase.Deliveries.Include(x => x.User).FirstOrDefault(x => x.Serial_number == delivery.Serial_number);
+                var existingDelivery = await dataBase.Deliveries.Include(x => x.User).FirstOrDefaultAsync(x => x.Serial_number == delivery.Serial_number);
                 if (existingDelivery != null) return StatusCode(409);
 
                 Models.Delivery newDelivery;
-                dataBase.Deliveries.Add(newDelivery = new Models.Delivery()
+                await dataBase.Deliveries.AddAsync(newDelivery = new Models.Delivery()
                 {
                     Supplier_id = UserId,
                     Serial_number = delivery.Serial_number,
                     Date = DateTime.Now,
                     Status = "В ожидании"
                 });
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(newDelivery);
             }
@@ -109,22 +109,22 @@ namespace PSN_API.Controllers
         /// <returns>Обновлённая запись</returns>
         [Route("update")]
         [HttpPut]
-        public ActionResult Update([FromHeader] string token, [FromBody] Models.Delivery delivery)
+        public async Task<ActionResult> Update([FromHeader] string token, [FromBody] Models.Delivery delivery)
         {
             try
             {
                 int? UserId = JwtToken.GetUserIdFromToken(token);
                 if (UserId == null) return Unauthorized();
 
-                Models.Delivery existingDelivery = dataBase.Deliveries.Include(x => x.User).FirstOrDefault(x => x.id == delivery.id);
+                Models.Delivery existingDelivery = await dataBase.Deliveries.Include(x => x.User).FirstOrDefaultAsync(x => x.id == delivery.id);
                 if (existingDelivery == null) return NotFound();
 
                 // Если статус "Принята", то копируем поставку в таблицу склада, иначе просто обновляем статус и серийный номер
                 if (delivery.Status == "Принята")
                 {
                     // Получаем содержимое поставки
-                    var deliveryItems = new ObservableCollection<DeliveryItem>(dataBase.DeliveryItems
-                        .Where(x => x.Delivery_id == delivery.id).ToList());
+                    var deliveryItems = new ObservableCollection<DeliveryItem>( await dataBase.DeliveryItems
+                        .Where(x => x.Delivery_id == delivery.id).ToListAsync());
                     foreach (var i in deliveryItems)
                     {
                         // Создаём новый объект на складе
@@ -136,12 +136,12 @@ namespace PSN_API.Controllers
                             Exp_date = i.Exp_date,
                             Position = "Н/Д"
                         };
-                        dataBase.WarehouseItems.Add(newWarehouseItem);
+                        await dataBase.WarehouseItems.AddAsync(newWarehouseItem);
                     }
                 }
                 existingDelivery.Serial_number = delivery.Serial_number;
                 existingDelivery.Status = delivery.Status;
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(existingDelivery);
             }
@@ -161,7 +161,7 @@ namespace PSN_API.Controllers
         /// <returns>Статус операции</returns>
         [Route("delete")]
         [HttpDelete]
-        public ActionResult Delete([FromHeader] string token, [FromForm] int id)
+        public async Task<ActionResult> Delete([FromHeader] string token, [FromForm] int id)
         {
             try
             {
@@ -171,11 +171,11 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingDelivery = dataBase.Deliveries.FirstOrDefault(x => x.id == id);
+                var existingDelivery = await dataBase.Deliveries.FirstOrDefaultAsync(x => x.id == id);
                 if (existingDelivery == null) return NotFound();
 
                 dataBase.Deliveries.Remove(existingDelivery);
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(existingDelivery);
             }

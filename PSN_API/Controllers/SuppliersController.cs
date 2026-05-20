@@ -38,7 +38,7 @@ namespace PSN_API.Controllers
         /// <returns>Список или ошибка</returns>
         [Route("get")]
         [HttpGet]
-        public ActionResult Get([FromHeader] string token)
+        public async Task<ActionResult> Get([FromHeader] string token)
         {
             try
             {
@@ -49,13 +49,13 @@ namespace PSN_API.Controllers
                 if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 // Конвертируем модель в DTO модель
-                var suppliers = dataBase.Suppliers.Include(x => x.User)
+                var suppliers = ( await dataBase.Suppliers.Include(x => x.User)
                     .Select(x => new SupplierDTO
                     {
                         id = x.user_id,
                         CompanyName = x.Company_name,
                         FullName = x.FullName
-                    })
+                    }).ToListAsync())
                     // Запоминаем полученные данные с сервера
                     .AsEnumerable()
                     // Конвертируем DTO обратно в обычную модель для отправки клиенту
@@ -89,7 +89,7 @@ namespace PSN_API.Controllers
         /// <returns>Новый объект или ошибка</returns>
         [Route("add")]
         [HttpPost]
-        public ActionResult Add([FromHeader] string token, [FromBody] Models.Supplier supplier)
+        public async Task<ActionResult> Add([FromHeader] string token, [FromBody] Models.Supplier supplier)
         {
             try
             {
@@ -99,8 +99,8 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingStaff = dataBase.Staff.Include(x => x.User).FirstOrDefault(x => x.user_id == supplier.user_id);
-                var existingSupplier = dataBase.Suppliers.Include(x => x.User).FirstOrDefault(x => x.user_id == supplier.user_id);
+                var existingStaff = await dataBase.Staff.Include(x => x.User).FirstOrDefaultAsync(x => x.user_id == supplier.user_id);
+                var existingSupplier = await dataBase.Suppliers.Include(x => x.User).FirstOrDefaultAsync(x => x.user_id == supplier.user_id);
                 if (existingStaff == null && existingSupplier == null)
                 {
                     Supplier newSupplier = new Supplier()
@@ -108,11 +108,11 @@ namespace PSN_API.Controllers
                         user_id = supplier.user_id,
                         Company_name = supplier.Company_name
                     };
-                    dataBase.Suppliers.Add(newSupplier);
+                    await dataBase.Suppliers.AddAsync(newSupplier);
                 }
                 else return BadRequest("Ошибка: У пользователя уже есть роль");
 
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(supplier);
             }
@@ -133,7 +133,7 @@ namespace PSN_API.Controllers
         /// <returns>Обновлённая запись</returns>
         [Route("update")]
         [HttpPut]
-        public ActionResult Update([FromHeader] string token, [FromHeader] int updateUserId, [FromBody] Models.Supplier supplier)
+        public async Task<ActionResult> Update([FromHeader] string token, [FromHeader] int updateUserId, [FromBody] Models.Supplier supplier)
         {
             try
             {
@@ -143,29 +143,29 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var updatingSupplier = dataBase.Suppliers.Include(x => x.User).FirstOrDefault(x => x.user_id == updateUserId);
+                var updatingSupplier = await dataBase.Suppliers.Include(x => x.User).FirstOrDefaultAsync(x => x.user_id == updateUserId);
                 if (updatingSupplier == null) return BadRequest("Ошибка: Редактируемый поставщик не найден");
 
                 if (updateUserId != supplier.user_id)
                 {
                     // Проверяем, существует ли новый пользователь
-                    if (!dataBase.Users.Any(u => u.id == supplier.user_id))
+                    if (!await dataBase.Users.AnyAsync(u => u.id == supplier.user_id))
                         return BadRequest("Ошибка: Новый пользователь не существует");
 
                     // Проверяем, не занят ли он уже другой ролью
-                    if (dataBase.Suppliers.Any(s => s.user_id == supplier.user_id) ||
-                        dataBase.Staff.Any(st => st.user_id == supplier.user_id))
+                    if (await dataBase.Suppliers.AnyAsync(s => s.user_id == supplier.user_id) ||
+                        await dataBase.Staff.AnyAsync(st => st.user_id == supplier.user_id))
                         return BadRequest("Ошибка: У нового пользователя уже есть роль");
 
                     dataBase.Suppliers.Remove(updatingSupplier);
-                    dataBase.Suppliers.Add(supplier);
+                    await dataBase.Suppliers.AddAsync(supplier);
                 }
                 else
                 {
                     updatingSupplier.Company_name = supplier.Company_name;
                 }
 
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
                 return Ok(supplier);
             }
             catch (Exception ex)
@@ -184,7 +184,7 @@ namespace PSN_API.Controllers
         /// <returns>Статус операции</returns>
         [Route("delete")]
         [HttpDelete]
-        public ActionResult Delete([FromHeader] string token, [FromForm] int user_id)
+        public async Task<ActionResult> Delete([FromHeader] string token, [FromForm] int user_id)
         {
             try
             {
@@ -194,12 +194,12 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "leader" && UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existSupplier = dataBase.Suppliers.Include(x => x.User).FirstOrDefault(x => x.user_id == user_id);
+                var existSupplier = await dataBase.Suppliers.Include(x => x.User).FirstOrDefaultAsync(x => x.user_id == user_id);
 
                 if (existSupplier == null) return NotFound();
 
                 dataBase.Suppliers.Remove(existSupplier);
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok();
             }

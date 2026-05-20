@@ -42,11 +42,11 @@ namespace PSN_API.Controllers
         /// <returns>JWT токен или код ошибки</returns>
         [Route("login")]
         [HttpPost]
-        public ActionResult Login([FromForm] string login, [FromForm] string password)
+        public async Task<ActionResult> Login([FromForm] string login, [FromForm] string password)
         {
             try
             {
-                var user = dataBase.Users.Include(x => x.Supplier).Include(x => x.Staff).FirstOrDefault(x => x.Login == login && x.Password == password);
+                var user = await dataBase.Users.Include(x => x.Supplier).Include(x => x.Staff).FirstOrDefaultAsync(x => x.Login == login && x.Password == password);
                 if (user == null) return StatusCode(401);
 
                 string role = "";

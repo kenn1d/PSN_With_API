@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSN_API.Classes;
 using PSN_API.Data;
@@ -37,7 +36,7 @@ namespace PSN_API.Controllers
         /// <returns>Список записей или ошибка</returns>
         [Route("get")]
         [HttpGet]
-        public ActionResult Get([FromHeader] string token)
+        public async Task<ActionResult> Get([FromHeader] string token)
         {
             try
             {
@@ -47,7 +46,7 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole == "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                List<Models.ShopItem> shopItems = dataBase.ShopItems.Include(x => x.WarehouseItem).ToList();
+                List<Models.ShopItem> shopItems = await dataBase.ShopItems.Include(x => x.WarehouseItem).ToListAsync();
                 return Ok(shopItems);
             }
             catch (Exception ex)
@@ -66,7 +65,7 @@ namespace PSN_API.Controllers
         /// <returns>Новый объект или ошибка</returns>
         [Route("add")]
         [HttpPost]
-        public ActionResult Add([FromHeader] string token, [FromBody] Models.ShopItem shopItem)
+        public async Task<ActionResult> Add([FromHeader] string token, [FromBody] Models.ShopItem shopItem)
         {
             try
             {
@@ -78,10 +77,12 @@ namespace PSN_API.Controllers
 
                 // Проверяем есть ли уже элемент такой позицией
                 // Если true то изменяем количество - обновляем запись
-                var itemPositionOnWarehouse = dataBase.WarehouseItems.Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).First(x => x.id == shopItem.Warehouse_item_id).Position;
-                var existingShopItem = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.WarehouseItem.Position == itemPositionOnWarehouse); 
+                var warehouseItem = await dataBase.WarehouseItems.Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).FirstAsync(x => x.id == shopItem.Warehouse_item_id);
+                var itemPositionOnWarehouse = warehouseItem.Position;
+
+                var existingShopItem = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync(x => x.WarehouseItem.Position == itemPositionOnWarehouse); 
                 // Ищем этот же товар на складе
-                var WI = dataBase.WarehouseItems.FirstOrDefault(x => x.id == shopItem.Warehouse_item_id);
+                var WI = await dataBase.WarehouseItems.FirstOrDefaultAsync(x => x.id == shopItem.Warehouse_item_id);
                 if (existingShopItem != null)
                 {
                     // Cчитаем разницу между тем что было и тем что ввели, 0 - если значение null
@@ -96,8 +97,8 @@ namespace PSN_API.Controllers
                         return BadRequest("Ошибка: На складе недостаточно товара");
                     }
                     
-                    dataBase.SaveChanges();
-                    var Result = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.id == existingShopItem.id);
+                    await dataBase.SaveChangesAsync();
+                    var Result = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync(x => x.id == existingShopItem.id);
                     return Ok(Result);
                 }
                 else // Создаём новую запись
@@ -110,7 +111,7 @@ namespace PSN_API.Controllers
                             WI.Count -= (int)shopItem.Count;
 
                             Models.ShopItem newShopItem;
-                            dataBase.ShopItems.Add(newShopItem = new Models.ShopItem()
+                            await dataBase.ShopItems.AddAsync(newShopItem = new Models.ShopItem()
                             {
                                 Warehouse_item_id = shopItem.Warehouse_item_id,
                                 Count = shopItem.Count
@@ -122,8 +123,8 @@ namespace PSN_API.Controllers
                         }
                     }
                     
-                    dataBase.SaveChanges();
-                    var Result = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.Warehouse_item_id == shopItem.Warehouse_item_id);
+                    await dataBase.SaveChangesAsync();
+                    var Result = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync(x => x.Warehouse_item_id == shopItem.Warehouse_item_id);
                     return Ok(Result);
                 }
             }
@@ -138,12 +139,12 @@ namespace PSN_API.Controllers
         /// <summary>
         /// Обновление записи продукта на продаже
         /// </summary>
-        /// <param name="token">JWT токен запроса</param>
+        /// <param name="token">JWT токен запроса</param>FirstOrDefault
         /// <param name="shopItem">Обновлённые данные записи</param>
         /// <returns>Обновлённая запись</returns>
         [Route("update")]
         [HttpPut]
-        public ActionResult Update([FromHeader] string token, [FromBody] Models.ShopItem shopItem)
+        public async Task<ActionResult> Update([FromHeader] string token, [FromBody] Models.ShopItem shopItem)
         {
             try
             {
@@ -154,22 +155,22 @@ namespace PSN_API.Controllers
                 if (UserRole == "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
                 
                 // Получаем изменяемую позицию в списке
-                var existingShopItem = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.id == shopItem.id);
+                var existingShopItem = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync(x => x.id == shopItem.id);
                 if (existingShopItem == null) return NotFound("Ошибка: Изменяемая запись не найдена");
 
                 // Ищем складской товар, который прислал клиент
-                var newWI = dataBase.WarehouseItems.FirstOrDefault(x => x.id == shopItem.Warehouse_item_id);
+                var newWI = await dataBase.WarehouseItems.FirstOrDefaultAsync(x => x.id == shopItem.Warehouse_item_id);
                 if (newWI == null) return BadRequest("Ошибка: Позиция на складе не найдена");
 
                 // 1: Пользователь сменил сам товар со склада
                 if (existingShopItem.Warehouse_item_id != shopItem.Warehouse_item_id)
                 {
                     // Ищем старый складской товар, чтобы вернуть его остатки
-                    var oldWI = dataBase.WarehouseItems.FirstOrDefault(x => x.id == existingShopItem.Warehouse_item_id);
+                    var oldWI = await dataBase.WarehouseItems.FirstOrDefaultAsync(x => x.id == existingShopItem.Warehouse_item_id);
                     if (oldWI != null) oldWI.Count += existingShopItem.Count ?? 0; // Полностью возвращаем старый товар на старую позицию
 
                     // Проверяем на дублирование позиции
-                    var duplicateShopItem = dataBase.ShopItems.FirstOrDefault(x => x.Warehouse_item_id == shopItem.Warehouse_item_id);
+                    var duplicateShopItem = await dataBase.ShopItems.FirstOrDefaultAsync(x => x.Warehouse_item_id == shopItem.Warehouse_item_id);
 
                     // Проверяем, хватает ли нового товара на складе для добавления
                     int requestedCount = shopItem.Count ?? 0;
@@ -183,9 +184,9 @@ namespace PSN_API.Controllers
                             duplicateShopItem.Count += requestedCount;
                             // Удаляем редактируемую запись
                             dataBase.ShopItems.Remove(existingShopItem);
-                            dataBase.SaveChanges();
+                            await dataBase.SaveChangesAsync();
 
-                            var duplicateResult = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.id == duplicateShopItem.id);
+                            var duplicateResult = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync(x => x.id == duplicateShopItem.id);
                             return Ok(duplicateResult);
                         }
                         else // Просто обновляем текущую запись
@@ -216,8 +217,8 @@ namespace PSN_API.Controllers
                     }
                 }
 
-                dataBase.SaveChanges();
-                var Result = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.id == existingShopItem.id);
+                await dataBase.SaveChangesAsync();
+                var Result = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync(x => x.id == existingShopItem.id);
                 return Ok(Result);
             }
             catch (Exception ex)
@@ -237,7 +238,7 @@ namespace PSN_API.Controllers
         /// <returns>Обновлённая запись</returns>
         [Route("sale")]
         [HttpPut]
-        public ActionResult Sale([FromHeader] string token, [FromForm] int id, [FromForm] int count)
+        public async Task<ActionResult> Sale([FromHeader] string token, [FromForm] int id, [FromForm] int count)
         {
             try
             {
@@ -248,13 +249,13 @@ namespace PSN_API.Controllers
                 if (UserRole == "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 // Получаем изменяемую позицию в списке
-                var existingShopItem = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.id == id);
+                var existingShopItem = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync(x => x.id == id);
                 if (existingShopItem == null) return NotFound("Ошибка: Изменяемая запись не найдена");
 
                 if (existingShopItem.Count <= count) return BadRequest("Ошибка: Недостаточно товара для продажи");
 
                 existingShopItem.Count -= count;
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
                 return Ok(existingShopItem);
             }
             catch (Exception ex)
@@ -273,7 +274,7 @@ namespace PSN_API.Controllers
         /// <returns>Статус операции</returns>
         [Route("delete")]
         [HttpDelete]
-        public ActionResult Delete([FromHeader] string token, [FromForm] int id)
+        public async Task<ActionResult> Delete([FromHeader] string token, [FromForm] int id)
         {
             try
             {
@@ -283,16 +284,16 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole == "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingShopItem = dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefault(x => x.id == id);
+                var existingShopItem = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync(x => x.id == id);
                 if (existingShopItem == null) return NotFound("Ошибка: Такая не найдена на продаже");
 
-                var WI = dataBase.WarehouseItems.FirstOrDefault(x => x.id == existingShopItem.Warehouse_item_id);
+                var WI = await dataBase.WarehouseItems.FirstOrDefaultAsync(x => x.id == existingShopItem.Warehouse_item_id);
                 if (WI == null) return BadRequest("Ошибка: На складе такая позиция не найдена");
 
                 WI.Count += existingShopItem.Count ?? 0;
 
                 dataBase.ShopItems.Remove(existingShopItem);
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(existingShopItem);
             }

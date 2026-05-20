@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PSN_API.Classes;
 using PSN_API.Data;
 using System.Data;
@@ -36,7 +37,7 @@ namespace PSN_API.Controllers
         /// <returns>Список записей или ошибка</returns>
         [Route("get")]
         [HttpGet]
-        public ActionResult Get([FromHeader] string token)
+        public async Task<ActionResult> Get([FromHeader] string token)
         {
             try
             {
@@ -48,10 +49,10 @@ namespace PSN_API.Controllers
 
                 if (UserRole == "admin")
                 {
-                    var users = dataBase.Users.ToList();
+                    var users = await dataBase.Users.ToListAsync();
                     return Ok(users);
                 }
-                var dtoUsers = dataBase.Users.Select(x => new UserDTO { id = x.id, full_name = x.Full_name, tel_number = x.Tel_number }).ToList();
+                var dtoUsers = await dataBase.Users.Select(x => new UserDTO { id = x.id, full_name = x.Full_name, tel_number = x.Tel_number }).ToListAsync();
                 return Ok(dtoUsers);
             }
             catch (Exception ex)
@@ -70,7 +71,7 @@ namespace PSN_API.Controllers
         /// <returns>Новый объект или ошибка</returns>
         [Route("add")]
         [HttpPost]
-        public ActionResult Add([FromHeader] string token, [FromBody] Models.User User)
+        public async Task<ActionResult> Add([FromHeader] string token, [FromBody] Models.User User)
         {
             try
             {
@@ -80,7 +81,7 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existingUser = dataBase.Users.FirstOrDefault(x => x.Login == User.Login);
+                var existingUser = await dataBase.Users.FirstOrDefaultAsync(x => x.Login == User.Login);
                 if (existingUser == null)
                 {
                     Models.User newUser = new Models.User()
@@ -90,11 +91,11 @@ namespace PSN_API.Controllers
                         Login = User.Login,
                         Password = User.Password
                     };
-                    dataBase.Users.Add(newUser);
+                    await dataBase.Users.AddAsync(newUser);
                 }
                 else return BadRequest("Ошибка: Пользователь с таким логином уже существует");
 
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(User);
             }
@@ -115,7 +116,7 @@ namespace PSN_API.Controllers
         /// <returns>Обновлённая запись</returns>
         [Route("update")]
         [HttpPut]
-        public ActionResult Update([FromHeader] string token, [FromHeader] int updateUserId, [FromBody] Models.User User)
+        public async Task<ActionResult> Update([FromHeader] string token, [FromHeader] int updateUserId, [FromBody] Models.User User)
        {
             try
             {
@@ -125,13 +126,13 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var updatingUser = dataBase.Users.FirstOrDefault(x => x.id == updateUserId);
+                var updatingUser = await dataBase.Users.FirstOrDefaultAsync(x => x.id == updateUserId);
                 if (updatingUser == null) return BadRequest("Ошибка: Редактируемый пользователь не найден");
 
                 if (updatingUser.Login != User.Login)
                 {
                     // Проверяем, существует ли пользователь с новым логином
-                    if (dataBase.Users.Any(u => u.Login == User.Login))
+                    if (await dataBase.Users.AnyAsync(u => u.Login == User.Login))
                         return BadRequest("Ошибка: Пользователь с таким логином уже существует");
                 }
                 updatingUser.Full_name = User.Full_name;
@@ -139,7 +140,7 @@ namespace PSN_API.Controllers
                 updatingUser.Login = User.Login;
                 updatingUser.Password = User.Password;
 
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
                 return Ok(updatingUser);
             }
             catch (Exception ex)
@@ -158,7 +159,7 @@ namespace PSN_API.Controllers
         /// <returns>Статус операции</returns>
         [Route("delete")]
         [HttpDelete]
-        public ActionResult Delete([FromHeader] string token, [FromForm] int user_id)
+        public async Task<ActionResult> Delete([FromHeader] string token, [FromForm] int user_id)
         {
             try
             {
@@ -168,12 +169,12 @@ namespace PSN_API.Controllers
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
-                var existUser = dataBase.Users.FirstOrDefault(x => x.id == user_id);
+                var existUser = await dataBase.Users.FirstOrDefaultAsync(x => x.id == user_id);
 
                 if (existUser == null) return NotFound();
 
                 dataBase.Users.Remove(existUser);
-                dataBase.SaveChanges();
+                await dataBase.SaveChangesAsync();
 
                 return Ok(existUser);
             }
