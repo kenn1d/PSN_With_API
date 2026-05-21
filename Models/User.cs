@@ -21,8 +21,8 @@ namespace PetrolStationNetwork.Models
 
         // навигации к ролям (один-ко-одному)
         [JsonIgnore]
-        public Supplier Supplier { get; set; }
+        public Supplier? Supplier { get; set; }
         [JsonIgnore]
-        public Staff Staff { get; set; }
+        public Staff? Staff { get; set; }
     }
 }

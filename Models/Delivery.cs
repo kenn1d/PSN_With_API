@@ -19,9 +19,7 @@ namespace PetrolStationNetwork.Models
         [ObservableProperty]
         private string status;
 
-        public virtual User? User { get; set; }
-
         [NotMapped]
-        public string FullName => User?.Full_name ?? "Нет ФИО";
+        public string FullName { get; set; }
     }
 }
