@@ -2,7 +2,9 @@
 using CommunityToolkit.Mvvm.Input;
 using PetrolStationNetwork.Data;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Input;
 
 namespace PetrolStationNetwork.ViewModels
@@ -54,19 +56,32 @@ namespace PetrolStationNetwork.ViewModels
                 {
                     if (fullName != null && phone != null && login != null && password != null)
                     {
-                        var dataUser = new Models.User()
+                        if (string.IsNullOrWhiteSpace(FullName) || !Regex.IsMatch(FullName, @"^[А-ЯЁ][а-яё]+(-[А-ЯЁ][а-яё]+)? [А-ЯЁ][а-яё]+( [А-ЯЁ][а-яё]+)?$"))
                         {
-                            Full_name = FullName,
-                            Tel_number = Phone,
-                            Login = Login,
-                            Password = Password
-                        };
-                        var addUser = await Data.Common.UsersCommon.Add(dataUser);
-                        if (addUser != null)
-                        {
-                            await LoadRecords();
+                            MessageBox.Show("Неверный формат ФИО. Каждое слово должно начинаться с заглавной буквы (например: Иванов Иван Иванович)", "Внимание!",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
-                        else MessageBox.Show("Ошибка при добавлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                        else if (string.IsNullOrWhiteSpace(phone) || !Regex.IsMatch(phone, @"^8\d{10}$"))
+                        {
+                            MessageBox.Show("Неверный формат номера телефона. Номер должен состоять из 11 цифр и начинаться с 8 (например, 89991234567)", "Внимание!",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                        else
+                        {
+                            var dataUser = new Models.User()
+                            {
+                                Full_name = FullName,
+                                Tel_number = Phone,
+                                Login = Login,
+                                Password = Password
+                            };
+                            var addUser = await Data.Common.UsersCommon.Add(dataUser);
+                            if (addUser != null)
+                            {
+                                await LoadRecords();
+                            }
+                            else MessageBox.Show("Ошибка при добавлении записи", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                     }
                     else
                     {

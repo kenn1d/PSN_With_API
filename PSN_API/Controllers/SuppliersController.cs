@@ -157,6 +157,8 @@ namespace PSN_API.Controllers
                         await dataBase.Staff.AnyAsync(st => st.user_id == supplier.user_id))
                         return BadRequest("Ошибка: У нового пользователя уже есть роль");
 
+                    supplier.User = null;
+
                     dataBase.Suppliers.Remove(updatingSupplier);
                     await dataBase.Suppliers.AddAsync(supplier);
                 }

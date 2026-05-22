@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PSN_API.Classes;
 using PSN_API.Data;
+using PSN_API.Models;
 
 namespace PSN_API.Controllers
 {
@@ -108,10 +109,13 @@ namespace PSN_API.Controllers
                 if (UserId == null) return Unauthorized();
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
-                if (UserRole == "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+                if (UserRole == "Supplier" && UserRole == "worker") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
 
                 var existingWarehouseItem = await dataBase.WarehouseItems.Include(x => x.Product).Include(x => x.DeliveryItem).ThenInclude(x => x.Delivery).FirstOrDefaultAsync(x => x.id == id);
                 if (existingWarehouseItem == null) return NotFound();
+
+                var existingShopItem = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync();
+                if (existingShopItem != null) return BadRequest("Ошибка: Этот товар находится в продаже");
 
                 dataBase.WarehouseItems.Remove(existingWarehouseItem);
                 await dataBase.SaveChangesAsync();

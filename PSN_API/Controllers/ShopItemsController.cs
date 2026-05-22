@@ -252,7 +252,7 @@ namespace PSN_API.Controllers
                 var existingShopItem = await dataBase.ShopItems.Include(x => x.WarehouseItem).FirstOrDefaultAsync(x => x.id == id);
                 if (existingShopItem == null) return NotFound("Ошибка: Изменяемая запись не найдена");
 
-                if (existingShopItem.Count <= count) return BadRequest("Ошибка: Недостаточно товара для продажи");
+                if (existingShopItem.Count < count) return BadRequest("Ошибка: Недостаточно товара для продажи");
 
                 existingShopItem.Count -= count;
                 await dataBase.SaveChangesAsync();
@@ -266,6 +266,7 @@ namespace PSN_API.Controllers
             }
         }
 
+        //TODO: Реализовать удаление при отсутствии записи на складе
         /// <summary>
         /// Удаление записи продукта на продаже
         /// </summary>

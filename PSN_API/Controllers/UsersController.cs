@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PSN_API.Classes;
 using PSN_API.Data;
 using System.Data;
+using System.Text.RegularExpressions;
 
 namespace PSN_API.Controllers
 {
@@ -80,6 +81,18 @@ namespace PSN_API.Controllers
 
                 string? UserRole = JwtToken.GetRoleFromToken(token);
                 if (UserRole != "admin") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+
+                string namePattern = @"^[А-ЯЁ][а-яё]+(-[А-ЯЁ][а-яё]+)? [А-ЯЁ][а-яё]+( [А-ЯЁ][а-яё]+)?$";
+                if (string.IsNullOrWhiteSpace(User.Full_name) || !Regex.IsMatch(User.Full_name, namePattern))
+                {
+                    return BadRequest("Ошибка: Неверный формат ФИО. Каждое слово должно начинаться с заглавной буквы (например: Иванов Иван Иванович)");
+                }
+
+                string phonePattern = @"^8\d{10}$";
+                if (string.IsNullOrWhiteSpace(User.Tel_number) || !Regex.IsMatch(User.Tel_number, phonePattern))
+                {
+                    return BadRequest("Ошибка: Неверный формат номера телефона. Номер должен состоять из 11 цифр и начинаться с 8 (например, 89991234567)");
+                }
 
                 var existingUser = await dataBase.Users.FirstOrDefaultAsync(x => x.Login == User.Login);
                 if (existingUser == null)
