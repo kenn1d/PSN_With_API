@@ -10,6 +10,7 @@ namespace PetrolStationNetwork.ViewModels
 {
     public partial class VMExport : ObservableObject
     {
+        // Флаги выбора, какие списки экспортировать
         [ObservableProperty]
         private bool deliveries;
 
@@ -34,6 +35,7 @@ namespace PetrolStationNetwork.ViewModels
         [ObservableProperty]
         private bool staff;
 
+        // Команда запуска экспорта в Excel
         public ICommand Export {  get; }
 
         public VMExport() {
@@ -54,16 +56,21 @@ namespace PetrolStationNetwork.ViewModels
                     FileName = $"PSN_Экспорт_От_{DateTime.Now:M}" // Задаем имя файлу
                 };
 
+                // Если пользователь выбрал файл для сохранения
                 if (sfd.ShowDialog() == true && sfd.FileName != null)
                 {
                     try
                     {
+                        // Создаём новую книгу Excel и заполняем листы по выбору пользователя
                         using (var workbook = new XLWorkbook())
                         {
+                            // Раздел: Поставки
                             if (Deliveries)
                             {
+                                // Получаем пользователей для отображения поставщика
                                 var users = await Data.Common.UsersCommon.Get();
 
+                                // Создаём лист и задаём заголовки колонок
                                 var sheet = workbook.Worksheets.Add("Поставки");
                                 sheet.Cell(1, 1).Value = "Id";
                                 sheet.Cell(1, 2).Value = "Поставщик";
@@ -71,6 +78,7 @@ namespace PetrolStationNetwork.ViewModels
                                 sheet.Cell(1, 4).Value = "Дата";
                                 sheet.Cell(1, 5).Value = "Статус";
 
+                                // Получаем поставки и заполняем строки
                                 var deliveries = await Data.Common.DeliveriesCommon.Get();
                                 int row = 2;
                                 foreach (var item in deliveries)
@@ -86,11 +94,14 @@ namespace PetrolStationNetwork.ViewModels
                                 Styles(sheet, 5, row - 1);
                             }
 
+                            // Раздел: Элементы поставок
                             if (DeliveryItems)
                             {
+                                // Получаем поставки и продукты для связывания по id
                                 var deliveries = await Data.Common.DeliveriesCommon.Get();
                                 var products = await Data.Common.ProductsCommon.Get();
 
+                                // Создаём лист и задаём заголовки
                                 var sheet = workbook.Worksheets.Add("Элементы поставок");
                                 sheet.Cell(1, 1).Value = "Id";
                                 sheet.Cell(1, 2).Value = "Поставка";
@@ -98,6 +109,7 @@ namespace PetrolStationNetwork.ViewModels
                                 sheet.Cell(1, 4).Value = "Количество";
                                 sheet.Cell(1, 5).Value = "Срок годности";
 
+                                // Получаем элементы поставок и заполняем строки
                                 var deliveryItems = await Data.Common.DeliveryItemsCommon.Get();
                                 int row = 2;
                                 foreach (var item in deliveryItems)
@@ -113,12 +125,15 @@ namespace PetrolStationNetwork.ViewModels
                                 Styles(sheet, 5, row - 1);
                             }
 
+                            // Раздел: Список продуктов
                             if (Products)
                             {
+                                // Создаём лист и заголовки
                                 var sheet = workbook.Worksheets.Add("Продукты");
                                 sheet.Cell(1, 1).Value = "Id";
                                 sheet.Cell(1, 2).Value = "Наименование";
 
+                                // Получаем продукты и заполняем таблицу
                                 var products = await Data.Common.ProductsCommon.Get();
                                 int row = 2;
                                 foreach (var item in products)
@@ -127,14 +142,18 @@ namespace PetrolStationNetwork.ViewModels
                                     sheet.Cell(row, 2).Value = item.Name;
 
                                     row++;
+
                                 }
                                 Styles(sheet, 2, row - 1);
                             }
 
+                            // Раздел: Позиции на складе
                             if (WarehouseItems)
                             {
+                                // Подгружаем продукты для отображения названий
                                 var products = await Data.Common.ProductsCommon.Get();
 
+                                // Заголовки листа "Склад"
                                 var sheet = workbook.Worksheets.Add("Склад");
                                 sheet.Cell(1, 1).Value = "Id";
                                 sheet.Cell(1, 2).Value = "Продукт";
@@ -142,6 +161,7 @@ namespace PetrolStationNetwork.ViewModels
                                 sheet.Cell(1, 4).Value = "Срок годности";
                                 sheet.Cell(1, 5).Value = "Позиция";
 
+                                // Получаем позиции на складе и заполняем строки
                                 var warehouseItems = await Data.Common.WarehouseItemsCommon.Get();
                                 int row = 2;
                                 foreach (var item in warehouseItems)
@@ -157,15 +177,19 @@ namespace PetrolStationNetwork.ViewModels
                                 Styles(sheet, 5, row - 1);
                             }
 
+                            // Раздел: Товары в торговом зале
                             if (ShopItems)
                             {
+                                // Получаем позиции склада для отображения связи
                                 var warehouseItems = await Data.Common.WarehouseItemsCommon.Get();
 
+                                // Заголовки листа
                                 var sheet = workbook.Worksheets.Add("Торговый зал");
                                 sheet.Cell(1, 1).Value = "Id";
                                 sheet.Cell(1, 2).Value = "Позиция на складе";
                                 sheet.Cell(1, 3).Value = "Количество";
 
+                                // Получаем элементы торгового зала и заполняем таблицу
                                 var shopItems = await Data.Common.ShopItemsCommon.Get();
                                 int row = 2;
                                 foreach (var item in shopItems)
@@ -175,12 +199,15 @@ namespace PetrolStationNetwork.ViewModels
                                     sheet.Cell(row, 3).Value = item.Count;
 
                                     row++;
+
                                 }
                                 Styles(sheet, 3, row - 1);
                             }
 
+                            // Раздел: Пользователи
                             if (Users)
                             {
+                                // Заголовки для списка пользователей
                                 var sheet = workbook.Worksheets.Add("Пользователи");
                                 sheet.Cell(1, 1).Value = "Id";
                                 sheet.Cell(1, 2).Value = "ФИО";
@@ -188,6 +215,7 @@ namespace PetrolStationNetwork.ViewModels
                                 sheet.Cell(1, 4).Value = "Логин";
                                 sheet.Cell(1, 5).Value = "Пароль";
 
+                                // Получаем пользователей и записываем в лист
                                 var users = await Data.Common.UsersCommon.Get();
                                 int row = 2;
                                 foreach (var item in users)
@@ -203,12 +231,15 @@ namespace PetrolStationNetwork.ViewModels
                                 Styles(sheet, 5, row - 1);
                             }
 
+                            // Раздел: Поставщики
                             if (Suppliers)
                             {
+                                // Заголовки листа поставщиков
                                 var sheet = workbook.Worksheets.Add("Поставщики");
                                 sheet.Cell(1, 1).Value = "ФИО";
                                 sheet.Cell(1, 2).Value = "Компания";
 
+                                // Получаем поставщиков и заполняем таблицу
                                 var suppliers = await Data.Common.SuppliersCommon.Get();
                                 int row = 2;
                                 foreach (var item in suppliers)
@@ -221,12 +252,15 @@ namespace PetrolStationNetwork.ViewModels
                                 Styles(sheet, 2, row - 1);
                             }
 
+                            // Раздел: Сотрудники
                             if (Staff)
                             {
+                                // Заголовки листа сотрудников
                                 var sheet = workbook.Worksheets.Add("Сотрудники");
                                 sheet.Cell(1, 1).Value = "ФИО";
                                 sheet.Cell(1, 2).Value = "Роль";
 
+                                // Получаем сотрудников и записываем в лист
                                 var staff = await Data.Common.StaffCommon.Get();
                                 int row = 2;
                                 foreach (var item in staff)
@@ -241,14 +275,17 @@ namespace PetrolStationNetwork.ViewModels
                             workbook.SaveAs(sfd.FileName);
                         }
 
+                        // Уведомление об успешном экспорте
                         MessageBox.Show("Данные успешно экспортированы!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex) {
+                        // При ошибке показываем сообщение (можно дополнительно логировать)
                         MessageBox.Show($"Произошла ошибка при экспорте данных: {ex}", "Вниание!", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             });
         }
+        // Применяет унифицированные стили к листу Excel
         private void Styles(ClosedXML.Excel.IXLWorksheet sheet, int lastColumn, int lastRow)
         {
             if (lastRow < 1) return; // Если таблица пустая, ничего не делаем
