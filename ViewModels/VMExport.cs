@@ -289,8 +289,7 @@ namespace PetrolStationNetwork.ViewModels
             data.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
             data.Style.Border.InsideBorderColor = XLColor.FromHtml("#E0E0E0");
 
-            // Автоподбор ширины столбцов
-            sheet.Columns().AdjustToContents();
+            sheet.Column(1).Width = 20;
         }
     }
 }
