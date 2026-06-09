@@ -122,6 +122,17 @@ namespace PSN_API.Controllers
                 // Если статус "Принята", то копируем поставку в таблицу склада, иначе просто обновляем статус и серийный номер
                 if (delivery.Status == "Принята")
                 {
+                    string? UserRole = JwtToken.GetRoleFromToken(token);
+                    if (UserRole == "Supplier") return BadRequest("Ошибка 403: Отсутствуют права доступа"); // StatusCode 403 нет доступа
+
+                    // Проверяем наличие на складе дубликатов, была ли поставка уже принята
+                    var existingWarehouseItem = await dataBase.WarehouseItems
+                                            .Include(x => x.DeliveryItem)
+                                            .Include(x => x.Product)
+                                            .Where(x => x.Delivery_items_id.HasValue && dataBase.DeliveryItems.Select(d => d.id).Contains(x.Delivery_items_id.Value))
+                                            .ToListAsync();
+                    if (existingWarehouseItem.Count > 0) return BadRequest("Ошибка: Поставка уже была принята");
+
                     // Получаем содержимое поставки
                     var deliveryItems = new ObservableCollection<DeliveryItem>( await dataBase.DeliveryItems
                         .Where(x => x.Delivery_id == delivery.id).ToListAsync());
